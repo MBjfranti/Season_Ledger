@@ -487,6 +487,7 @@ details.preview .prose { padding: 4px 20px 20px; }
 }
 .bc.have { color: var(--win); border: 1px solid rgba(111,213,132,0.5); background: rgba(111,213,132,0.08); }
 .bc.need { color: var(--draw); border: 1px solid rgba(242,207,91,0.5); background: rgba(242,207,91,0.08); }
+.bc + .bc { margin-left: 4px; }
 
 /* Month jump bar */
 .month-nav {

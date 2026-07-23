@@ -3,9 +3,9 @@ import { computed } from "vue";
 import { broadcastFor } from "../utils.js";
 
 const props = defineProps({ comp: { type: String, required: true } });
-const b = computed(() => broadcastFor(props.comp));
+const services = computed(() => broadcastFor(props.comp));
 </script>
 
 <template>
-  <span :class="b.have ? 'bc have' : 'bc need'">{{ b.svc }}<template v-if="b.note"> ({{ b.note }})</template></span>
+  <span v-for="(b, i) in services" :key="i" :class="b.have ? 'bc have' : 'bc need'">{{ b.svc }}<template v-if="b.note"> ({{ b.note }})</template></span>
 </template>
