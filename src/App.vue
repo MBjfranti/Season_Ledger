@@ -25,7 +25,7 @@ function onImportPicked(e) {
         <input ref="importFile" type="file" accept="application/json" hidden @change="onImportPicked">
       </nav>
     </header>
-    <main><router-view /></main>
+    <main><router-view :key="$route.fullPath" /></main>
     <div class="footer-note">Data lives in this browser (localStorage) — export regularly for backup.</div>
   </div>
 </template>

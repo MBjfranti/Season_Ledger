@@ -78,13 +78,13 @@ const bandSegs = computed(() => {
           <div class="stat"><div class="num"><FormChips :form="record.form" /></div><div class="lbl">Form (last 5)</div></div>
         </div>
 
-        <div class="section-label">Season preview</div>
+        <h2 class="section-label">Season preview</h2>
         <details class="preview">
           <summary>Read the full preview</summary>
           <div class="prose"><p v-for="(p, i) in club.preview" :key="i">{{ p }}</p></div>
         </details>
 
-        <div class="section-label">Results</div>
+        <h2 class="section-label">Results</h2>
         <div v-if="matches.length" class="log-scroll">
           <table class="log-table">
             <thead><tr><th>Date</th><th>Comp</th><th>Opponent</th><th>Result</th><th>Notes</th></tr></thead>
@@ -104,13 +104,14 @@ const bandSegs = computed(() => {
 
       <div>
         <div class="band-wrap">
-          <div class="section-label" style="margin:0 0 4px">Forecast: {{ club.forecast.low }}{{ getOrdinal(club.forecast.low) }}–{{ club.forecast.high }}{{ getOrdinal(club.forecast.high) }}</div>
+          <h2 class="section-label" style="margin:0 0 4px">Forecast: {{ club.forecast.low }}{{ getOrdinal(club.forecast.low) }}–{{ club.forecast.high }}{{ getOrdinal(club.forecast.high) }}</h2>
           <div class="band-row">
             <div v-for="s in bandSegs" :key="s.pos" class="band-seg"
                  :class="{ 'in-band': s.inBand, current: s.current }"
                  :title="`${s.pos}${getOrdinal(s.pos)}`"></div>
           </div>
           <div class="band-legend"><span>1st</span><span>{{ league.size }}{{ getOrdinal(league.size) }}</span></div>
+          <div class="band-current">Currently: {{ pos ? pos + getOrdinal(pos) : "not set" }}</div>
           <div class="pos-controls">
             <label for="posInput">Current position</label>
             <input id="posInput" type="number" min="1" :max="league.size" :value="pos || ''"
@@ -119,16 +120,16 @@ const bandSegs = computed(() => {
           <div class="band-note">{{ club.forecast.extra }}</div>
         </div>
 
-        <div class="section-label">Next up</div>
+        <h2 class="section-label">Next up</h2>
         <ul v-if="upcoming.length" class="fixtures">
           <li v-for="f in upcoming" :key="f.id">
             <span class="when">{{ fmtDate(f.date) }}<template v-if="f.time"> · {{ f.time }}</template></span>
-            <span>{{ matchupLabel(f) }} · {{ f.comp }}</span> <BcChip :comp="f.comp" />
+            <span class="fx-line">{{ matchupLabel(f) }} · {{ f.comp }} <BcChip :comp="f.comp" /></span>
           </li>
         </ul>
         <div v-else class="empty">No upcoming fixtures on the <router-link to="/calendar">calendar</router-link>.</div>
 
-        <div class="section-label">Key dates</div>
+        <h2 class="section-label">Key dates</h2>
         <ul class="fixtures">
           <li v-for="(k, i) in club.keyFixtures" :key="i"><span class="when">{{ k.when }}</span><span>{{ k.label }}</span></li>
         </ul>

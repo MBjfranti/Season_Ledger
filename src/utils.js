@@ -28,15 +28,28 @@ export function timeSortKey(t) {
   return h * 60 + parseInt(m[2], 10);
 }
 
+// Local-time ISO date. Never toISOString() for "today": that is UTC, which
+// flips to tomorrow around 6-7 PM Central and hides same-evening fixtures.
+const pad2 = n => String(n).padStart(2, "0");
+export function toLocalISO(d) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
 export function weekStart(iso) {
   const d = new Date(iso + "T12:00:00");
   const day = (d.getDay() + 6) % 7; // Monday = 0
   d.setDate(d.getDate() - day);
-  return d.toISOString().slice(0, 10);
+  return toLocalISO(d);
+}
+
+export function addDaysISO(iso, days) {
+  const d = new Date(iso + "T12:00:00");
+  d.setDate(d.getDate() + days);
+  return toLocalISO(d);
 }
 
 export function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  return toLocalISO(new Date());
 }
 
 export function resultLetter(gf, ga) {

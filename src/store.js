@@ -203,6 +203,7 @@ export function importData(file) {
     try {
       const s = JSON.parse(reader.result);
       if (typeof s !== "object" || !s) throw new Error("bad file");
+      if (!confirm("Importing replaces ALL current ledger data — logged matches, fixtures, stars, watched marks and notes. Continue?")) return;
       state.matches = s.matches || {};
       state.positions = s.positions || {};
       state.fixtures = s.fixtures || [];

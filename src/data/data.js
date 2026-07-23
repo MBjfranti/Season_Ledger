@@ -15,16 +15,13 @@ export const LEAGUES = {
 // (the owner often prefers them) get their own chip with note "Esp.".
 // have: true = already subscribed (ESPN+, Peacock, Paramount+) or free (Fandango); false = not yet.
 export const BROADCAST = {
-  "Premier League":          [{ svc: "Peacock", have: true },
-                              { svc: "Peacock", have: true, note: "Esp." }],
+  "Premier League":          [{ svc: "Peacock · Esp.", have: true }],
   "EFL Championship":        [{ svc: "Paramount+", have: true }],
   "EFL Cup":                 [{ svc: "Paramount+", have: true }],
   "FA Cup":                  [{ svc: "ESPN+", have: true }],
-  "Ligue 1":                 [{ svc: "beIN Sports", have: false, note: "planned" },
-                              { svc: "beIN Sports", have: false, note: "Esp." }],
+  "Ligue 1":                 [{ svc: "beIN Sports · Esp.", have: false, note: "planned" }],
   "Coupe de France":         [{ svc: "Check listings", have: false }],
-  "La Liga":                 [{ svc: "ESPN+", have: true },
-                              { svc: "ESPN+", have: true, note: "Esp." }],
+  "La Liga":                 [{ svc: "ESPN+ · Esp.", have: true }],
   "Copa del Rey":            [{ svc: "ESPN+", have: true }],
   "Serie A":                 [{ svc: "Paramount+", have: true }],
   "Coppa Italia":            [{ svc: "Paramount+", have: true }],

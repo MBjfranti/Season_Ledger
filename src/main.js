@@ -8,6 +8,9 @@ import "./styles.css";
 
 const router = createRouter({
   history: createWebHashHistory(),
+  scrollBehavior(to, from, savedPosition) {
+    return savedPosition || { top: 0 };
+  },
   routes: [
     { path: "/", component: DashboardView },
     { path: "/calendar", component: CalendarView },

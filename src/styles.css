@@ -24,9 +24,9 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+/* No global smooth scrolling: jumps across a 10-month calendar animate for
+   seconds and blank the viewport. Jumps are instant via scrollIntoView. */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
   * { animation: none !important; transition: none !important; }
 }
 
@@ -504,9 +504,13 @@ details.preview .prose { padding: 4px 20px 20px; }
 }
 .month-nav .btn { padding: 4px 10px; font-size: 13.5px; }
 
-.week { margin-bottom: 8px; scroll-margin-top: 64px; }
+.week {
+  margin-bottom: 8px; scroll-margin-top: 64px;
+  content-visibility: auto; contain-intrinsic-size: auto 600px;
+}
 .week.past { opacity: 0.75; }
 .week-head {
+  margin: 0;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -642,3 +646,113 @@ details.preview .prose { padding: 4px 20px 20px; }
   color: var(--text-3);
   text-align: center;
 }
+
+/* ── UI/UX review batch (2026-07-23) ───────────────────── */
+
+/* Heading semantics: section/day headers are real h2/h3 now; kill UA margins */
+h2.section-label { /* class already sets margin */ }
+h3.day-head { margin: 12px 0 6px; }
+h3.mini-day-head { margin: 0 0 2px; }
+
+/* Calendar filter bar */
+.filter-bar {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  margin-bottom: 14px;
+}
+.filter-chip {
+  display: inline-flex; flex-direction: column;
+  font-family: var(--display);
+  cursor: pointer;
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--panel);
+  padding: 0;
+}
+.filter-chip:hover { background: var(--panel-hover); }
+.filter-chip .kit { height: 6px; width: 100%; }
+.filter-chip .fc-label {
+  font-weight: 600; font-size: 15px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-2);
+  padding: 4px 12px 5px;
+}
+.filter-chip.toggle .fc-label, .filter-chip:first-child .fc-label { padding-top: 8px; padding-bottom: 8px; }
+.filter-chip.active { border-color: var(--win); }
+.filter-chip.active .fc-label, .filter-chip:hover .fc-label { color: var(--text); }
+.filter-select {
+  font-family: var(--sans); font-size: 14px;
+  color: var(--text); background: var(--panel);
+  border: 1px solid var(--panel-edge); border-radius: 6px;
+  padding: 8px 10px;
+}
+
+/* Collapsed past weeks */
+.week-collapsed {
+  display: flex; align-items: baseline; gap: 14px; width: 100%;
+  font-family: var(--sans); text-align: left; cursor: pointer;
+  background: none; border: none; border-bottom: 1px solid var(--panel-edge);
+  padding: 10px 2px; color: var(--text-3);
+}
+.week-collapsed:hover { color: var(--text-2); background: var(--panel); }
+.week-collapsed .wc-head {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.week-collapsed .wc-sum { font-size: 13.5px; }
+.week-collapsed .wc-expand { margin-left: auto; }
+.wc-collapse { margin-left: 10px; font-size: 12px; padding: 2px 8px; }
+
+/* Compact fixture rows (unranked fixtures; cards are for Watch/Backup/starred) */
+.fx-row {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 7px 10px;
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  font-size: 14.5px;
+}
+.fx-row .kit { width: 20px; height: 12px; border-radius: 2px; flex: none; }
+.fx-row.is-watched { border-color: rgba(111,213,132,0.45); }
+.fxr-time {
+  font-family: var(--mono); font-size: 12.5px; color: var(--text-3);
+  min-width: 78px;
+}
+.fxr-match { font-weight: 600; }
+.fxr-note { font-style: italic; color: var(--text-2); font-size: 13px; }
+.fxr-actions { margin-left: auto; display: flex; gap: 4px; }
+.fxr-actions .btn { padding: 2px 8px; font-size: 12.5px; }
+
+/* Dashboard watch-plan hero */
+.watch-hero {
+  padding: 16px 18px;
+  background: rgba(111,213,132,0.09);
+  border: 1px solid rgba(111,213,132,0.35);
+  border-radius: 8px;
+}
+.watch-hero .wh-main {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+}
+.watch-hero .wh-main strong {
+  font-family: var(--display);
+  font-weight: 600; font-size: 26px;
+  text-transform: uppercase; letter-spacing: 0.02em;
+}
+.watch-hero .wh-main .reasons { flex-basis: 100%; margin: 0; }
+.wh-backups { margin-top: 12px; border-top: 1px solid rgba(111,213,132,0.25); padding-top: 10px; }
+.wh-backup {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  padding: 3px 0; font-size: 14.5px;
+}
+.wh-b-match { font-family: var(--display); font-weight: 600; font-size: 17px; text-transform: uppercase; letter-spacing: 0.03em; }
+.watch-hero .wn-link { display: inline-block; margin-top: 10px; font-size: 14px; color: var(--text-2); text-decoration: none; }
+.watch-hero .wn-link:hover { color: var(--text); }
+.kickoff-note { margin-top: 10px; font-size: 14.5px; color: var(--text-2); }
+
+/* Misc review fixes */
+.notes-form input { flex: 1; min-width: 140px; }
+.fx-line { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.stat .num .none { font-size: 14px; font-weight: 400; }
+.band-current { font-size: 13.5px; color: var(--text-2); margin-top: 6px; }
+.field-check { flex-direction: row; align-items: center; gap: 8px; }
+.field-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--win); }
