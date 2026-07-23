@@ -201,6 +201,7 @@ textarea:focus-visible, summary:focus-visible {
 .kit-deportivo { background: repeating-linear-gradient(90deg, #0d5eaf 0 18px, #ffffff 18px 36px); }
 .kit-milan     { background: repeating-linear-gradient(90deg, #d40000 0 12px, #111111 12px 24px); }
 .kit-bremen    { background: linear-gradient(115deg, #169152 0 40%, #ffffff 40% 56%, #169152 56%); }
+.kit-westbrom  { background: repeating-linear-gradient(90deg, #122f67 0 16px, #ffffff 16px 32px); }
 
 .card .body { padding: 16px 18px 18px; }
 .card h3 {

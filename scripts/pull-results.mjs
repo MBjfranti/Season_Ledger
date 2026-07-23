@@ -28,6 +28,7 @@ const RESULTS_PATH = fileURLToPath(new URL("../src/data/results.js", import.meta
 const TEAM_IDS = {
   brighton: "331", wrexham: "352", lincoln: "314", rennes: "169",
   lorient: "273", deportivo: "90", milan: "103", bremen: "137",
+  westbrom: "383",
 };
 const CLUB_BY_TEAM_ID = Object.fromEntries(Object.entries(TEAM_IDS).map(([c, t]) => [t, c]));
 

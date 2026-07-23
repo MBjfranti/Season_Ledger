@@ -37,6 +37,7 @@ export const BROADCAST = {
 export const RIVALS = {
   brighton:  ["Crystal Palace"],
   wrexham:   ["Cardiff", "Chester", "Shrewsbury"],
+  westbrom:  ["Wolverhampton", "Wolves", "Aston Villa", "Birmingham"],
   lincoln:   ["Grimsby", "Scunthorpe"],
   rennes:    ["Lorient", "Nantes", "Guingamp"],
   lorient:   ["Rennes", "Nantes", "Brest", "Guingamp"],
@@ -48,7 +49,7 @@ export const RIVALS = {
 // Marquee opponents per league — a match against these is worth watching.
 export const BIG_OPPONENTS = {
   premierLeague: ["Arsenal", "Liverpool", "Manchester City", "Man City", "Manchester United", "Man United", "Man Utd", "Chelsea", "Tottenham", "Spurs", "Newcastle", "Aston Villa"],
-  championship:  ["Leeds", "Sunderland", "Leicester", "Southampton", "West Brom", "Norwich", "Middlesbrough", "Sheffield United", "Sheffield Wednesday", "Ipswich"],
+  championship:  ["Leeds", "Sunderland", "Leicester", "Southampton", "Norwich", "Middlesbrough", "Sheffield United", "Sheffield Wednesday", "Ipswich", "Wolverhampton", "West Ham", "Burnley"],
   ligue1:        ["PSG", "Paris Saint-Germain", "Marseille", "Lyon", "Monaco", "Lille", "Nice", "Lens"],
   laLiga:        ["Real Madrid", "Barcelona", "Atlético", "Atletico", "Athletic", "Sevilla", "Villarreal", "Real Sociedad", "Betis"],
   serieA:        ["Inter", "Juventus", "Napoli", "Roma", "Lazio", "Atalanta", "Fiorentina", "Bologna"],
@@ -61,6 +62,7 @@ export const BIG_OPPONENTS = {
 export const CLUB_SITES = {
   brighton:  "https://www.brightonandhovealbion.com",
   wrexham:   "https://www.wrexhamafc.co.uk",
+  westbrom:  "https://www.wba.co.uk",
   lincoln:   "https://www.weareimps.com",
   rennes:    "https://www.srfc.bzh",
   lorient:   "https://www.fclorient.bzh",
@@ -73,6 +75,7 @@ export const CLUB_SITES = {
 export const STADIUMS = {
   brighton:  { name: "American Express Stadium (The Amex)", capacity: 31876 },
   wrexham:   { name: "STōK Cae Ras (Racecourse Ground)", capacity: 10771, note: "new Kop opens during 2026–27, rising to ~18,000" },
+  westbrom:  { name: "The Hawthorns", capacity: 26850 },
   lincoln:   { name: "LNER Stadium (Sincil Bank)", capacity: 10669 },
   rennes:    { name: "Roazhon Park", capacity: 29778 },
   lorient:   { name: "Stade du Moustoir", capacity: 18110 },
@@ -85,6 +88,7 @@ export const STADIUMS = {
 export const CLUB_IMAGES = {
   brighton:  { hero: "img/hero-brighton.jpg",  crest: "img/crest-brighton.png", heroPos: "center 72%" },
   wrexham:   { hero: "img/hero-wrexham.jpg",   crest: "img/crest-wrexham.png", heroPos: "center 55%" },
+  westbrom:  { hero: "img/hero-westbrom.jpg",  crest: "img/crest-westbrom.png", heroPos: "center 45%" },
   lincoln:   { hero: "img/hero-lincoln.jpg",   crest: "img/crest-lincoln.png", heroPos: "center 50%" },
   rennes:    { hero: "img/hero-rennes.jpg",    crest: "img/crest-rennes.png", heroPos: "center 55%" },
   lorient:   { hero: "img/hero-lorient.jpg",   crest: "img/crest-lorient.png", heroPos: "center" },
@@ -158,6 +162,32 @@ export const CLUBS = [
       "Lincoln's best chance lies in making home matches uncomfortable. They must preserve the energy, directness and collective discipline of the promotion side rather than attempting to imitate wealthier possession teams. Set pieces, second balls and late goals may matter more than aesthetic consistency. Away from home, accepting draws and avoiding heavy defeats will be crucial.",
       "The opening trip to Middlesbrough is a harsh introduction, followed by a home match against Portsmouth. Those fixtures should quickly reveal whether Lincoln's defensive structure can survive the jump in attacking quality.",
       "My forecast: 18th–22nd. Survival by any margin would constitute a successful season. Of all your selected clubs, Lincoln should produce the most intense weekly emotional investment.",
+    ],
+  },
+  {
+    id: "westbrom",
+    name: "West Bromwich Albion",
+    short: "West Brom",
+    league: "championship",
+    leagueComp: "EFL Championship",
+    comps: ["EFL Championship", "FA Cup", "EFL Cup"],
+    manager: "James Morrison",
+    forecast: { low: 8, high: 13, extra: "A playoff push if the Morrison bounce survives a full season." },
+    keyFixtures: [
+      { label: "Rotherham United (A) — EFL Cup R1", when: "Aug 8, 2026", date: "2026-08-08" },
+      { label: "Norwich City (A) — opening trip", when: "Aug 15, 2026", date: "2026-08-15" },
+      { label: "Burnley (H) — first home match", when: "Aug 23, 2026", date: "2026-08-23" },
+      { label: "Wolves (A) — Black Country derby", when: "Sep 20, 2026", date: "2026-09-20" },
+      { label: "Wrexham (A)", when: "Oct 13, 2026", date: "2026-10-13" },
+      { label: "Lincoln City (A) — Boxing Day", when: "Dec 26, 2026", date: "2026-12-26" },
+    ],
+    preview: [
+      "West Brom arrive in 2026–27 as a club that has just survived itself. Last season contained four separate managerial spells—Ryan Mason sacked in January, Eric Ramsay hired from Minnesota United and dismissed nine winless games later, and James Morrison twice stepping up from the coaching staff—plus a two-point deduction for a Profit and Sustainability breach that was among the smallest in EFL history. The result was 21st place, four points above the drop, rescued almost entirely by Morrison's late run: one defeat in the final fourteen matches.",
+      "That run earned the 39-year-old club legend the permanent job through 2028, and it is the season's central bet. Morrison made over 350 appearances for Albion, galvanized a fractured dressing room as caretaker, and prefers a straightforward 4-4-2. But interim bounces are notoriously loud and short, and this will be his first full season managing anywhere. The captaincy was still unsettled in pre-season—Jed Wallace has been released, with Alex Mowatt and Jayson Molumby the likeliest candidates.",
+      "The squad is better than last season's finish suggests. Isaac Price, still only 22, scored nine league goals from midfield and is the roster's most valuable asset; Aune Heggebø matched those nine up front. Chris Mepham, Nat Phillips and Krystian Bielik give Morrison an experienced center-back group. The summer has been young and modest: £4m striker Jimmy-Jay Morgan from Chelsea, Falkirk's Barney Stewart, and depth signings in goal and defense. The obvious hole is width—Morrison has said publicly that the squad lacks senior wingers, and until that is fixed the 4-4-2 risks becoming narrow and predictable.",
+      "Off the field, Shilen Patel's ownership is still cleaning up inherited finances—the PSR breach was a legacy issue the club chose not to appeal—and claims Albion enter this season in a healthier position with room to invest. They will need it: West Ham, Wolves and Burnley all came down from the Premier League, making this one of the strongest second tiers in years. Bookmakers price Albion mid-pack, around 17/2 for promotion. The Black Country derby returns to the league calendar on September 20 at Molineux, with the reverse at The Hawthorns in February.",
+      "For your slate, Albion thread directly through your other English clubs: away at Wrexham on October 13, hosting them on February 16, and a Boxing Day trip to Lincoln with the return in March—four league dates where two of your clubs collide.",
+      "My forecast: 8th–13th. If Morrison's galvanizing effect is real and a winger or two arrives, the playoffs are reachable; if it was an interim illusion, mid-table anonymity beckons. Either way, this is a big club at a genuinely uncertain hinge point—exactly the kind of season worth documenting.",
     ],
   },
   {

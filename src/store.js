@@ -48,6 +48,15 @@ function mergeSeedFixtures() {
     state.fixtures = state.fixtures.filter(f =>
       !(f.date === mv.from && (f.clubId === mv.clubId || f.opponentId === mv.clubId)));
   }
+  // Backfill opponentId on stored fixtures whose opponent has since become a
+  // tracked club (e.g. West Brom joining the slate turns existing Wrexham and
+  // Lincoln entries into two-club matchups).
+  for (const f of state.fixtures) {
+    if (!f.opponentId) {
+      const oid = detectOpponentId(f.clubId, f.opponent);
+      if (oid) f.opponentId = oid;
+    }
+  }
   const taken = new Set(state.removed);
   const mark = (cid, date) => taken.add(cid + "|" + date);
   for (const f of state.fixtures) {

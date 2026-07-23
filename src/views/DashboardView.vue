@@ -139,7 +139,7 @@ const starred = computed(() => state.fixtures
     </ul>
   </template>
 
-  <h2 class="section-label">The eight</h2>
+  <h2 class="section-label">The nine</h2>
   <div class="grid">
     <router-link v-for="c in clubs" :key="c.id" class="card" :to="`/club/${c.id}`">
       <div class="kit" :class="`kit-${c.id}`"></div>

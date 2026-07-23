@@ -15,7 +15,7 @@ function onImportPicked(e) {
     <header class="masthead">
       <div>
         <h1><router-link to="/">The Season Ledger</router-link></h1>
-        <div class="season">EUROPEAN FOOTBALL · 2026–27 · EIGHT CLUBS · SIX LEAGUES</div>
+        <div class="season">EUROPEAN FOOTBALL · 2026–27 · NINE CLUBS · SIX LEAGUES</div>
       </div>
       <nav class="tools">
         <router-link class="btn" to="/">Ledger</router-link>
