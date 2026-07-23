@@ -336,6 +336,9 @@ const LEAGUE_FIXTURES = {
 const CUP_FIXTURES = [
   // DFB-Pokal R1, moved to the Millerntor-Stadion in Hamburg — still Werder's away tie.
   { clubId: "bremen", opponent: "Lüneburger SK Hansa", venue: "A", comp: "DFB-Pokal", date: "2026-08-22", time: "8:30 AM CT" },
+  // EFL Cup R1 draws (per ESPN, 2026-07-23).
+  { clubId: "wrexham", opponent: "Middlesbrough", venue: "A", comp: "EFL Cup", date: "2026-08-07", time: "2:00 PM CT" },
+  { clubId: "lincoln", opponent: "Derby County", venue: "A", comp: "EFL Cup", date: "2026-08-08", time: "9:00 AM CT" },
 ];
 
 // Fixtures whose released date later moved (TV picks etc.). The app deletes the

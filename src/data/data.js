@@ -11,7 +11,7 @@ export const LEAGUES = {
 };
 
 // US broadcast rights mapped to the owner's services.
-// have: true = already subscribed (ESPN+, Peacock, Paramount+); false = not yet.
+// have: true = already subscribed (ESPN+, Peacock, Paramount+) or free (Fandango); false = not yet.
 export const BROADCAST = {
   "Premier League":          { svc: "Peacock",    have: true },
   "EFL Championship":        { svc: "Paramount+", have: true },
@@ -23,8 +23,8 @@ export const BROADCAST = {
   "Copa del Rey":            { svc: "ESPN+",      have: true },
   "Serie A":                 { svc: "Paramount+", have: true },
   "Coppa Italia":            { svc: "Paramount+", have: true },
-  "Bundesliga":              { svc: "ESPN+",      have: true },
-  "DFB-Pokal":               { svc: "ESPN+",      have: true },
+  "Bundesliga":              { svc: "Fandango",   have: true, note: "free w/ ads; 30+ picks on USA Network" },
+  "DFB-Pokal":               { svc: "Check listings", have: false, note: "US rights TBD post-ESPN" },
   "UEFA Conference League":  { svc: "Paramount+", have: true },
   "UEFA Europa League":      { svc: "Paramount+", have: true },
 };
