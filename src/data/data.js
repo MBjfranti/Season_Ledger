@@ -29,7 +29,7 @@ export const BROADCAST = {
   "Serie A":                 [{ svc: "Paramount+", have: true }],
   "Coppa Italia":            [{ svc: "Paramount+", have: true }],
   "Bundesliga":              [{ svc: "Fandango", have: true, note: "free" },
-                              { svc: "USA Network", have: false, note: "30+ picks" },
+                              { svc: "USA Network", have: false },
                               { svc: "Peacock", have: true, note: "Esp." }],
   "DFB-Pokal":               [{ svc: "Check listings", have: false, note: "US rights TBD post-ESPN" }],
   "UEFA Conference League":  [{ svc: "Paramount+", have: true }],
