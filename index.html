@@ -7,29 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="wrap">
-    <header class="masthead">
-      <div>
-        <h1><a href="#/">The Season Ledger</a></h1>
-        <div class="season">EUROPEAN FOOTBALL · 2026–27 · EIGHT CLUBS · SIX LEAGUES</div>
-      </div>
-      <nav class="tools">
-        <a class="btn" href="#/">Ledger</a>
-        <a class="btn" href="#/calendar">Calendar</a>
-        <button class="btn" id="exportBtn" type="button">Export</button>
-        <button class="btn" id="importBtn" type="button">Import</button>
-        <input type="file" id="importFile" accept="application/json" hidden>
-      </nav>
-    </header>
-    <main id="app"></main>
-    <div class="footer-note">Data lives in this browser (localStorage) — export regularly for backup.</div>
-  </div>
-  <script src="data.js"></script>
-  <script src="fixtures.js"></script>
-  <script src="results.js"></script>
-  <script src="app.js"></script>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

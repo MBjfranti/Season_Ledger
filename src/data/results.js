@@ -7,4 +7,4 @@
 // Optional (only needed if no fixture exists for that date):
 //   opponent, comp, venue ("H"/"A"/"N")
 
-const RESULTS = [];
+export const RESULTS = [];

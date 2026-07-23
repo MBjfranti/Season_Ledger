@@ -1,7 +1,7 @@
 // Seed data: the eight clubs, their leagues, forecasts, key fixtures and season previews.
 // Narratives are the owner's own 2026-27 previews, stored verbatim.
 
-const LEAGUES = {
+export const LEAGUES = {
   premierLeague: { name: "Premier League", country: "England", size: 20 },
   championship:  { name: "EFL Championship", country: "England/Wales", size: 24 },
   ligue1:        { name: "Ligue 1", country: "France", size: 18 },
@@ -12,7 +12,7 @@ const LEAGUES = {
 
 // US broadcast rights mapped to the owner's services.
 // have: true = already subscribed (ESPN+, Peacock, Paramount+); false = not yet.
-const BROADCAST = {
+export const BROADCAST = {
   "Premier League":          { svc: "Peacock",    have: true },
   "EFL Championship":        { svc: "Paramount+", have: true },
   "EFL Cup":                 { svc: "Paramount+", have: true },
@@ -30,7 +30,7 @@ const BROADCAST = {
 };
 
 // Derby / rivalry opponents per club (matched by substring, case-insensitive).
-const RIVALS = {
+export const RIVALS = {
   brighton:  ["Crystal Palace"],
   wrexham:   ["Cardiff", "Chester", "Shrewsbury"],
   lincoln:   ["Grimsby", "Scunthorpe"],
@@ -42,7 +42,7 @@ const RIVALS = {
 };
 
 // Marquee opponents per league — a match against these is worth watching.
-const BIG_OPPONENTS = {
+export const BIG_OPPONENTS = {
   premierLeague: ["Arsenal", "Liverpool", "Manchester City", "Man City", "Manchester United", "Man United", "Man Utd", "Chelsea", "Tottenham", "Spurs", "Newcastle", "Aston Villa"],
   championship:  ["Leeds", "Sunderland", "Leicester", "Southampton", "West Brom", "Norwich", "Middlesbrough", "Sheffield United", "Sheffield Wednesday", "Ipswich"],
   ligue1:        ["PSG", "Paris Saint-Germain", "Marseille", "Lyon", "Monaco", "Lille", "Nice", "Lens"],
@@ -54,7 +54,7 @@ const BIG_OPPONENTS = {
 // Local image assets (downloaded from Wikimedia Commons; see img/CREDITS.txt).
 // The app degrades gracefully if a file is missing.
 // Official club websites, linked from each club page banner.
-const CLUB_SITES = {
+export const CLUB_SITES = {
   brighton:  "https://www.brightonandhovealbion.com",
   wrexham:   "https://www.wrexhamafc.co.uk",
   lincoln:   "https://www.weareimps.com",
@@ -66,7 +66,7 @@ const CLUB_SITES = {
 };
 
 // Stadium name + capacity shown on club banners (verified July 2026).
-const STADIUMS = {
+export const STADIUMS = {
   brighton:  { name: "American Express Stadium (The Amex)", capacity: 31876 },
   wrexham:   { name: "STōK Cae Ras (Racecourse Ground)", capacity: 10771, note: "new Kop opens during 2026–27, rising to ~18,000" },
   lincoln:   { name: "LNER Stadium (Sincil Bank)", capacity: 10669 },
@@ -78,7 +78,7 @@ const STADIUMS = {
 };
 
 // heroPos: optional CSS background-position to control the hero crop (default "center 35%").
-const CLUB_IMAGES = {
+export const CLUB_IMAGES = {
   brighton:  { hero: "img/hero-brighton.jpg",  crest: "img/crest-brighton.png", heroPos: "center 72%" },
   wrexham:   { hero: "img/hero-wrexham.jpg",   crest: "img/crest-wrexham.png", heroPos: "center 55%" },
   lincoln:   { hero: "img/hero-lincoln.jpg",   crest: "img/crest-lincoln.png", heroPos: "center 50%" },
@@ -91,7 +91,7 @@ const CLUB_IMAGES = {
 
 // Full fixture lists live in fixtures.js (SEED_FIXTURES); results drops in results.js.
 
-const CLUBS = [
+export const CLUBS = [
   {
     id: "brighton",
     name: "Brighton & Hove Albion",

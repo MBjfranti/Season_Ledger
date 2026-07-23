@@ -1,3 +1,5 @@
+import { CLUBS } from "./data.js";
+
 // Full 2026–27 league fixture lists, gathered 2026-07-22 from official club sites
 // and cross-checked against league/press sources. Dates are as released; rounds
 // far out carry the Saturday of the confirmed matchday weekend and may move for
@@ -338,7 +340,7 @@ const CUP_FIXTURES = [
 
 // Fixtures whose released date later moved (TV picks etc.). The app deletes the
 // stale entry at `from` on load; the new date merges in from the lists above.
-const MOVED_FIXTURES = [
+export const MOVED_FIXTURES = [
   { clubId: "deportivo", from: "2026-08-16", to: "2026-08-17" }, // Elche H → Monday
   { clubId: "deportivo", from: "2026-08-23", to: "2026-08-24" }, // Málaga A → Monday
   { clubId: "wrexham",   from: "2026-08-29", to: "2026-08-28" }, // Birmingham H → Friday (Sky)
@@ -348,7 +350,7 @@ const MOVED_FIXTURES = [
 
 // Build the seed list app.js merges into saved state. Matchups between two
 // tracked clubs are stored once, under the home club, with opponentId set.
-const SEED_FIXTURES = (() => {
+export const SEED_FIXTURES = (() => {
   const findOpp = (clubId, name) => {
     const n = name.toLowerCase();
     const hit = CLUBS.find(c => c.id !== clubId &&
