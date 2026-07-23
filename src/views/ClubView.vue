@@ -46,6 +46,7 @@ const bandSegs = computed(() => {
 </script>
 
 <template>
+  <div class="sheet">
   <div v-if="!club" class="empty">Unknown club.</div>
   <template v-else>
     <ClubStrip :active-id="id" />
@@ -136,4 +137,5 @@ const bandSegs = computed(() => {
       </div>
     </div>
   </template>
+  </div>
 </template>
