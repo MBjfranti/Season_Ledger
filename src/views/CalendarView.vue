@@ -1,20 +1,15 @@
 <script setup>
-import { computed, ref, nextTick, watch, onMounted } from "vue";
+import { computed, ref, nextTick, watch } from "vue";
 import { CLUBS } from "../data/data.js";
 import { state, toggleStar, toggleWatched, setFixtureNotes, addFixture } from "../store.js";
-import { fmtDate, fmtDayHead, timeSortKey, weekStart, todayISO, fixtureScore,
+import { fmtDayHead, timeSortKey, addDaysISO, todayISO, fixtureScore,
          fixtureReasons, matchupLabel, clubById, broadcastFor } from "../utils.js";
 import BcChip from "../components/BcChip.vue";
 
-const openNotesFor = ref(null); // fixture id with the inline notes form expanded
-const noteDraft = ref("");
-const expandedPast = ref(new Set()); // past week keys the user opened
-
 /* ── Filters ───────────────────────────────────────────── */
-
-const clubFilter = ref(new Set()); // empty = all clubs
-const compFilter = ref("");        // "" = all competitions
-const watchableOnly = ref(false);  // only comps with a green (have) service
+const clubFilter = ref(new Set());
+const compFilter = ref("");
+const watchableOnly = ref(false);
 
 const allComps = computed(() => {
   const seen = new Set();
@@ -24,8 +19,7 @@ const allComps = computed(() => {
 
 function toggleClubFilter(id) {
   const next = new Set(clubFilter.value);
-  if (next.has(id)) next.delete(id);
-  else next.add(id);
+  next.has(id) ? next.delete(id) : next.add(id);
   clubFilter.value = next;
 }
 
@@ -47,128 +41,143 @@ function passesFilters(f) {
   return true;
 }
 
-/* ── Weeks ─────────────────────────────────────────────── */
-
-const weeks = computed(() => {
+/* ── Each match DAY nominates its own Watch + Backups ──────
+   Grouping by day (not week) so a busy stretch surfaces a pick
+   every matchday instead of one lone pick for the whole week. */
+const days = computed(() => {
   const dated = state.fixtures.filter(f => f.date && passesFilters(f))
     .sort((a, b) => a.date.localeCompare(b.date));
-  const byWeek = new Map();
+  const byDay = new Map();
   for (const f of dated) {
-    const wk = weekStart(f.date);
-    if (!byWeek.has(wk)) byWeek.set(wk, []);
-    byWeek.get(wk).push(f);
+    if (!byDay.has(f.date)) byDay.set(f.date, []);
+    byDay.get(f.date).push(f);
   }
-  const thisWeek = weekStart(todayISO());
-  return [...byWeek.entries()].map(([wk, fs]) => {
+  const now = todayISO();
+  return [...byDay.entries()].map(([date, fs]) => {
     const ranked = [...fs].sort((a, b) => fixtureScore(b) - fixtureScore(a) || a.date.localeCompare(b.date));
-    const days = new Map();
-    for (const f of fs) {
-      if (!days.has(f.date)) days.set(f.date, []);
-      days.get(f.date).push(f);
-    }
-    const dayBlocks = [...days.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([day, dfs]) => ({
-        day,
-        fixtures: dfs.sort((a, b) => timeSortKey(a.time) - timeSortKey(b.time) || fixtureScore(b) - fixtureScore(a)),
-      }));
-    return { wk, past: wk < thisWeek, count: fs.length, ranked, days: dayBlocks };
+    return { date, past: date < now, count: fs.length, ranked, fixtures: fs };
   });
 });
 
-// Month jump bar + upcoming anchor.
-const months = computed(() => {
-  const out = [];
-  for (const { wk } of weeks.value) {
-    const m = wk.slice(0, 7);
-    if (!out.some(x => x.key === m)) {
-      const d = new Date(wk + "T12:00:00");
-      const mon = d.toLocaleDateString(undefined, { month: "short" });
-      out.push({ key: m, wk, label: `${mon} '${String(d.getFullYear()).slice(2)}` });
-    }
-  }
-  return out;
-});
-
-const upcomingWk = computed(() => {
-  const thisWeek = weekStart(todayISO());
-  return weeks.value.find(w => w.wk >= thisWeek)?.wk || null;
-});
-
-// Each week gets one Watch pick and up to two Backups, ranked by fixtureScore.
-function tagFor(week, f) {
+function tagFor(day, f) {
   if (f.date < todayISO()) return "awaiting";
-  if (week.count > 1 || fixtureScore(f) > 30) {
-    const rank = week.ranked.indexOf(f);
-    if (rank === 0) return "watch";
-    if (rank <= 2) return "backup";
-  }
+  const rank = day.ranked.indexOf(f);
+  if (rank === 0) return "watch";      // the day's top pick
+  if (rank <= 2) return "backup";      // up to two alternates that day
   return null;
 }
 
-// Cards for the ranked picks and starred fixtures; compact rows for the rest.
-function isCard(week, f) {
-  const tag = tagFor(week, f);
-  return tag === "watch" || tag === "backup" || f.mustWatch;
-}
+const tagMap = computed(() => {
+  const m = new Map();
+  for (const d of days.value) for (const f of d.fixtures) m.set(f.id, tagFor(d, f));
+  return m;
+});
 
 function displayReasons(f) {
   return fixtureReasons(f).filter(r => r !== "Marked must-watch");
 }
 
-function jumpTo(wk, smooth = false) {
-  document.getElementById("wk-" + wk)?.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
-}
-
-function togglePastWeek(wk) {
-  const next = new Set(expandedPast.value);
-  if (next.has(wk)) next.delete(wk);
-  else next.add(wk);
-  expandedPast.value = next;
-}
-
-// Open at "now", not at last August.
-onMounted(() => {
-  if (upcomingWk.value && upcomingWk.value !== weeks.value[0]?.wk) {
-    nextTick(() => jumpTo(upcomingWk.value));
+/* ── Months + the selected month's matchdays ───────────── */
+const monthsList = computed(() => {
+  const out = [];
+  for (const d of days.value) for (const f of d.fixtures) {
+    const key = f.date.slice(0, 7);
+    if (!out.some(x => x.key === key)) {
+      const d = new Date(f.date + "T12:00:00");
+      out.push({ key, label: `${d.toLocaleDateString(undefined, { month: "short" })} '${String(d.getFullYear()).slice(2)}` });
+    }
   }
+  return out.sort((a, b) => a.key.localeCompare(b.key));
 });
 
-function openNotes(f) {
-  if (openNotesFor.value === f.id) {
-    openNotesFor.value = null;
-    return;
+const upcomingMonth = computed(() => {
+  const t = todayISO().slice(0, 7);
+  return monthsList.value.find(m => m.key >= t)?.key || monthsList.value[0]?.key || t;
+});
+
+const selectedMonth = ref(upcomingMonth.value);
+const today = todayISO();
+
+// Week starts Monday by default (European); toggle to Sunday for the US week.
+const weekStartSun = ref(localStorage.getItem("weekStartSun") === "1");
+watch(weekStartSun, v => localStorage.setItem("weekStartSun", v ? "1" : "0"));
+const DOW = computed(() => weekStartSun.value
+  ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
+
+function rowStart(dayISO) {
+  const dow = new Date(dayISO + "T12:00:00").getDay(); // 0 Sun … 6 Sat
+  const start = weekStartSun.value ? 0 : 1;
+  return addDaysISO(dayISO, -((dow - start + 7) % 7));
+}
+
+// The month laid out as week rows (Mon–Sun or Sun–Sat), 7 day cells each.
+const monthWeeks = computed(() => {
+  const key = selectedMonth.value;
+  if (!key) return [];
+  const y = +key.slice(0, 4), mo = +key.slice(5, 7);
+  const lastDay = new Date(y, mo, 0).getDate();
+  const byDate = new Map();
+  for (const d of days.value) for (const f of d.fixtures) {
+    if (f.date.slice(0, 7) !== key) continue;
+    if (!byDate.has(f.date)) byDate.set(f.date, []);
+    byDate.get(f.date).push(f);
   }
+  const rows = [];
+  let cur = rowStart(`${key}-01`);
+  const end = rowStart(`${key}-${String(lastDay).padStart(2, "0")}`);
+  while (cur <= end) {
+    const cells = [];
+    for (let i = 0; i < 7; i++) {
+      const day = addDaysISO(cur, i);
+      const fx = byDate.get(day) || [];
+      const fixtures = [...fx].sort((a, b) => timeSortKey(a.time) - timeSortKey(b.time) || fixtureScore(b) - fixtureScore(a));
+      const ranked = [...fx].sort((a, b) => fixtureScore(b) - fixtureScore(a));
+      const kits = [...new Set(fx.flatMap(f => f.opponentId ? [f.clubId, f.opponentId] : [f.clubId]))];
+      cells.push({ day, inMonth: day.slice(0, 7) === key, fixtures, count: fixtures.length, top: ranked[0], kits, past: day < today });
+    }
+    rows.push({ wk: cur, cells });
+    cur = addDaysISO(cur, 7);
+  }
+  return rows;
+});
+
+/* ── Day drawer ────────────────────────────────────────── */
+const selectedDay = ref(null);
+const selectedDayData = computed(() => {
+  for (const r of monthWeeks.value) for (const c of r.cells) if (c.day === selectedDay.value) return c;
+  return null;
+});
+watch(selectedMonth, () => { selectedDay.value = null; });
+
+// Busy days shrink their cards so the whole slate stays on screen with less
+// scrolling — comfortable by default, tighter as the count climbs.
+const drawerDensity = computed(() => {
+  const n = selectedDayData.value?.fixtures.length || 0;
+  return n >= 8 ? "packed" : n >= 5 ? "dense" : "";
+});
+
+function dnum(day) { return new Date(day + "T12:00:00").getDate(); }
+
+const openNotesFor = ref(null);
+const noteDraft = ref("");
+function openNotes(f) {
+  if (openNotesFor.value === f.id) { openNotesFor.value = null; return; }
   openNotesFor.value = f.id;
   noteDraft.value = f.notes || "";
   nextTick(() => document.querySelector(".notes-form input")?.focus());
 }
-
 function saveNote(f) {
   setFixtureNotes(f.id, noteDraft.value);
   openNotesFor.value = null;
 }
 
-/* ── Add-fixture form ──────────────────────────────────── */
-
-const form = ref({
-  clubId: CLUBS[0].id,
-  opponent: "",
-  venue: "H",
-  comp: CLUBS[0].comps[0],
-  date: "",
-  time: "",
-  mustWatch: false,
-});
-
+/* ── Add-fixture drawer ────────────────────────────────── */
+const showAdd = ref(false);
+const form = ref({ clubId: CLUBS[0].id, opponent: "", venue: "H", comp: CLUBS[0].comps[0], date: "", time: "", mustWatch: false });
 const compOptions = computed(() => clubById(form.value.clubId)?.comps || []);
+watch(() => form.value.clubId, () => { form.value.comp = compOptions.value[0]; });
 
-// Repopulate the competition choice when the selected club changes.
-watch(() => form.value.clubId, () => {
-  form.value.comp = compOptions.value[0];
-});
-
-// "14:05" from the time input -> "2:05 PM CT" as stored on fixtures.
 function toCTLabel(hhmm) {
   const m = /^(\d{2}):(\d{2})$/.exec(hhmm || "");
   if (!m) return "";
@@ -177,161 +186,155 @@ function toCTLabel(hhmm) {
   h = h % 12 || 12;
   return `${h}:${m[2]} ${ampm} CT`;
 }
-
 function submitFixture() {
   const opponent = form.value.opponent.trim();
   if (!opponent) return;
   addFixture({ ...form.value, opponent, time: toCTLabel(form.value.time) });
-  form.value.opponent = "";
-  form.value.date = "";
-  form.value.time = "";
-  form.value.mustWatch = false;
+  form.value.opponent = ""; form.value.date = ""; form.value.time = ""; form.value.mustWatch = false;
+  showAdd.value = false;
 }
 </script>
 
 <template>
-  <div class="filter-bar" role="group" aria-label="Filter fixtures">
-    <button class="filter-chip" :class="{ active: !clubFilter.size }"
-            :aria-pressed="!clubFilter.size" @click="clubFilter = new Set()">
-      <span class="fc-label">All clubs</span>
-    </button>
-    <button v-for="c in CLUBS" :key="c.id" class="filter-chip"
-            :class="{ active: clubFilter.has(c.id) }" :aria-pressed="clubFilter.has(c.id)"
-            @click="toggleClubFilter(c.id)">
-      <span class="kit" :class="`kit-${c.id}`"></span><span class="fc-label">{{ c.short }}</span>
-    </button>
-    <select v-model="compFilter" class="filter-select" aria-label="Filter by competition">
-      <option value="">All competitions</option>
-      <option v-for="comp in allComps" :key="comp" :value="comp">{{ comp }}</option>
-    </select>
-    <button class="filter-chip toggle" :class="{ active: watchableOnly }"
-            :aria-pressed="watchableOnly" @click="watchableOnly = !watchableOnly">
-      <span class="fc-label">✓ Watchable now</span>
-    </button>
-    <button v-if="filtersActive" class="btn" @click="clearFilters">Clear</button>
-  </div>
-
-  <div class="month-nav">
-    <span class="lbl">Jump to</span>
-    <button v-if="upcomingWk" class="btn" @click="jumpTo(upcomingWk)">Upcoming</button>
-    <button v-for="m in months" :key="m.key" class="btn" @click="jumpTo(m.wk)">{{ m.label }}</button>
-  </div>
-
-  <p class="explain" style="margin-top:12px">Each week gets one <span class="tag watch">Watch</span> pick and up to two
-    <span class="tag backup">Backup</span>s — ranked by matchups between your own clubs, derbies,
-    big-name opponents, European nights and cup ties. Star (★) a fixture to force it up the order.
-    Broadcast chips: <span class="bc have">✓ green</span> is a service you have,
-    <span class="bc need">+ amber</span> one you don't (yet). Mark what you saw with ☑ Watched and jot
-    notes (✎); scores arrive in periodic result pulls, so past fixtures read
-    <span class="tag awaiting">Awaiting result</span> until then. Times are US Central.</p>
-
-  <div v-if="!weeks.length" class="empty">
-    {{ filtersActive ? "No fixtures match these filters." : "No fixtures yet. Add the ones you care about below." }}
-  </div>
-
-  <div v-for="week in weeks" :key="week.wk" class="week" :class="{ past: week.past }" :id="`wk-${week.wk}`">
-    <template v-if="week.past && !expandedPast.has(week.wk)">
-      <button class="week-collapsed" @click="togglePastWeek(week.wk)">
-        <span class="wc-head">Week of {{ fmtDate(week.wk) }}</span>
-        <span class="wc-sum">{{ week.count }} fixture{{ week.count === 1 ? "" : "s" }} awaiting results</span>
-        <span class="wc-expand" aria-hidden="true">▸</span>
+  <div class="cal">
+    <div class="cal-controls" role="group" aria-label="Filter fixtures">
+      <button class="filter-chip toggle" :class="{ active: !clubFilter.size }"
+              :aria-pressed="!clubFilter.size" @click="clubFilter = new Set()">
+        <span class="fc-label">All</span>
       </button>
-    </template>
-    <template v-else>
-      <h2 class="week-head">
-        Week of {{ fmtDate(week.wk) }}
-        <button v-if="week.past" class="btn wc-collapse" @click="togglePastWeek(week.wk)">Collapse ▴</button>
-      </h2>
-      <div v-for="block in week.days" :key="block.day" class="day-block">
-        <h3 class="day-head">{{ fmtDayHead(block.day) }}</h3>
-        <div class="day-cards">
-          <template v-for="f in block.fixtures" :key="f.id">
-            <div v-if="isCard(week, f)" class="fx-card"
-                 :class="{ 'is-watch': tagFor(week, f) === 'watch', 'is-watched': f.watched }">
-              <div v-if="f.opponentId" class="kit-pair">
-                <span class="kit" :class="`kit-${f.clubId}`"></span><span class="kit" :class="`kit-${f.opponentId}`"></span>
-              </div>
-              <div v-else class="kit" :class="`kit-${f.clubId}`"></div>
-              <div class="fx-body">
-                <div class="fx-top">
-                  <span v-if="tagFor(week, f) === 'awaiting'" class="tag awaiting">Awaiting result</span>
-                  <span v-else-if="tagFor(week, f) === 'watch'" class="tag watch">Watch</span>
-                  <span v-else-if="tagFor(week, f) === 'backup'" class="tag backup">Backup</span>
-                  <span class="fx-time">{{ f.time || "Time TBD" }}</span>
-                </div>
-                <div class="fx-match">{{ matchupLabel(f) }}</div>
-                <div class="fx-meta"><span class="fx-comp">{{ f.comp }}</span> <BcChip :comp="f.comp" /></div>
-                <div v-if="displayReasons(f).length" class="reasons">{{ displayReasons(f).join(" · ") }}</div>
-                <div v-if="f.notes" class="fx-note">“{{ f.notes }}”</div>
-                <div class="fx-actions">
-                  <button class="btn star" :class="{ on: f.mustWatch }" :aria-pressed="f.mustWatch"
-                          :aria-label="`Must-watch: ${matchupLabel(f)}`" title="Toggle must-watch"
-                          @click="toggleStar(f.id)">{{ f.mustWatch ? "★" : "☆" }}</button>
-                  <button class="btn check" :class="{ on: f.watched }" :aria-pressed="f.watched"
-                          :aria-label="`Watched: ${matchupLabel(f)}`" title="Did you watch it?"
-                          @click="toggleWatched(f.id)">{{ f.watched ? "☑" : "☐" }} Watched</button>
-                  <button class="btn" :aria-label="`Note on ${matchupLabel(f)}`" title="Add a note"
-                          @click="openNotes(f)">✎ Note</button>
-                </div>
-                <form v-if="openNotesFor === f.id" class="notes-form" @submit.prevent="saveNote(f)">
-                  <input v-model="noteDraft" placeholder="Your notes on this one">
-                  <button class="btn primary" type="submit">Save note</button>
-                  <button class="btn" type="button" @click="openNotesFor = null">Cancel</button>
-                </form>
-              </div>
+      <button v-for="c in CLUBS" :key="c.id" class="filter-chip"
+              :class="{ active: clubFilter.has(c.id) }" :aria-pressed="clubFilter.has(c.id)"
+              @click="toggleClubFilter(c.id)">
+        <span class="kit" :class="`kit-${c.id}`"></span><span class="fc-label">{{ c.short }}</span>
+      </button>
+      <select v-model="compFilter" class="filter-select" aria-label="Filter by competition">
+        <option value="">All competitions</option>
+        <option v-for="comp in allComps" :key="comp" :value="comp">{{ comp }}</option>
+      </select>
+      <button class="filter-chip toggle" :class="{ active: watchableOnly }"
+              :aria-pressed="watchableOnly" @click="watchableOnly = !watchableOnly">
+        <span class="fc-label">✓ Watchable now</span>
+      </button>
+      <button v-if="filtersActive" class="btn" @click="clearFilters">Clear</button>
+      <span class="cal-spacer"></span>
+      <button class="btn" @click="showAdd = true">＋ Add fixture</button>
+    </div>
+
+    <div class="month-tabs">
+      <span class="lbl">Month</span>
+      <button v-for="m in monthsList" :key="m.key" class="btn month-tab"
+              :class="{ active: selectedMonth === m.key }" @click="selectedMonth = m.key">{{ m.label }}</button>
+      <span class="cal-spacer"></span>
+      <button class="btn wk-toggle" :title="`Week starts ${weekStartSun ? 'Sunday' : 'Monday'} — click to switch`"
+              @click="weekStartSun = !weekStartSun">{{ weekStartSun ? "Sun–Sat" : "Mon–Sun" }}</button>
+    </div>
+
+    <div v-if="!monthWeeks.length" class="empty">
+      {{ filtersActive ? "No fixtures this month match these filters." : "No fixtures this month." }}
+    </div>
+    <div v-else class="month-cal">
+      <div class="cal-dow-head"><span v-for="d in DOW" :key="d">{{ d }}</span></div>
+      <div class="cal-weeks">
+        <div v-for="row in monthWeeks" :key="row.wk" class="cal-week">
+          <component :is="c.count ? 'button' : 'div'" v-for="c in row.cells" :key="c.day"
+                     class="cal-cell"
+                     :class="{ has: c.count, out: !c.inMonth, empty: c.inMonth && !c.count, past: c.past, picked: selectedDay === c.day, today: c.day === today }"
+                     @click="c.count && (selectedDay = c.day)">
+            <div class="cell-top">
+              <span class="cell-num">{{ dnum(c.day) }}</span>
+              <span v-if="c.count && tagMap.get(c.top.id) === 'watch'" class="tag watch cell-tag">Watch</span>
             </div>
-            <div v-else class="fx-row" :class="{ 'is-watched': f.watched }">
-              <span class="kit" :class="`kit-${f.clubId}`"></span>
-              <span class="fxr-time">{{ f.time || "TBD" }}</span>
-              <span class="fxr-match">{{ matchupLabel(f) }}</span>
-              <span class="fx-comp">{{ f.comp }}</span>
-              <BcChip :comp="f.comp" />
-              <span v-if="tagFor(week, f) === 'awaiting'" class="tag awaiting">Awaiting result</span>
-              <span v-if="f.notes" class="fxr-note" :title="f.notes">✎ “{{ f.notes }}”</span>
-              <span class="fxr-actions">
+            <template v-if="c.count">
+              <div class="cell-match">{{ matchupLabel(c.top) }}</div>
+              <div class="cell-time">{{ c.top.time || "Time TBD" }}</div>
+              <div class="cell-foot">
+                <span class="dc-kits"><span v-for="k in c.kits.slice(0, 4)" :key="k" class="kit" :class="`kit-${k}`"></span></span>
+                <span v-if="c.count > 1" class="dc-more">+{{ c.count - 1 }}</span>
+              </div>
+            </template>
+          </component>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day drawer -->
+    <template v-if="selectedDay && selectedDayData">
+      <div class="drawer-backdrop" @click="selectedDay = null"></div>
+      <aside class="drawer" role="dialog" aria-label="Fixtures for the day">
+        <header class="drawer-head">
+          <div class="drawer-title">{{ fmtDayHead(selectedDay) }}</div>
+          <button class="btn drawer-close" @click="selectedDay = null">Close ✕</button>
+        </header>
+        <div class="drawer-body" :class="drawerDensity">
+          <div v-for="f in selectedDayData.fixtures" :key="f.id" class="fx-card"
+               :class="{ 'is-watch': tagMap.get(f.id) === 'watch', 'is-watched': f.watched }">
+            <div v-if="f.opponentId" class="kit-pair">
+              <span class="kit" :class="`kit-${f.clubId}`"></span><span class="kit" :class="`kit-${f.opponentId}`"></span>
+            </div>
+            <div v-else class="kit" :class="`kit-${f.clubId}`"></div>
+            <div class="fx-body">
+              <div class="fx-top">
+                <span v-if="tagMap.get(f.id) === 'awaiting'" class="tag awaiting">Awaiting result</span>
+                <span v-else-if="tagMap.get(f.id) === 'watch'" class="tag watch">Watch</span>
+                <span v-else-if="tagMap.get(f.id) === 'backup'" class="tag backup">Backup</span>
+                <span class="fx-time">{{ f.time || "Time TBD" }}</span>
+              </div>
+              <div class="fx-match">{{ matchupLabel(f) }}</div>
+              <div class="fx-meta"><span class="fx-comp">{{ f.comp }}</span> <BcChip :comp="f.comp" /></div>
+              <div v-if="displayReasons(f).length" class="reasons">{{ displayReasons(f).join(" · ") }}</div>
+              <div v-if="f.notes" class="fx-note">“{{ f.notes }}”</div>
+              <div class="fx-actions">
                 <button class="btn star" :class="{ on: f.mustWatch }" :aria-pressed="f.mustWatch"
-                        :aria-label="`Must-watch: ${matchupLabel(f)}`" title="Toggle must-watch"
-                        @click="toggleStar(f.id)">{{ f.mustWatch ? "★" : "☆" }}</button>
+                        title="Toggle must-watch" @click="toggleStar(f.id)">{{ f.mustWatch ? "★" : "☆" }}</button>
                 <button class="btn check" :class="{ on: f.watched }" :aria-pressed="f.watched"
-                        :aria-label="`Watched: ${matchupLabel(f)}`" title="Did you watch it?"
-                        @click="toggleWatched(f.id)">{{ f.watched ? "☑" : "☐" }}</button>
-                <button class="btn" :aria-label="`Note on ${matchupLabel(f)}`" title="Add a note"
-                        @click="openNotes(f)">✎</button>
-              </span>
+                        title="Did you watch it?" @click="toggleWatched(f.id)">{{ f.watched ? "☑" : "☐" }} Watched</button>
+                <button class="btn" title="Add a note" @click="openNotes(f)">✎ Note</button>
+              </div>
               <form v-if="openNotesFor === f.id" class="notes-form" @submit.prevent="saveNote(f)">
                 <input v-model="noteDraft" placeholder="Your notes on this one">
                 <button class="btn primary" type="submit">Save note</button>
                 <button class="btn" type="button" @click="openNotesFor = null">Cancel</button>
               </form>
             </div>
-          </template>
+          </div>
         </div>
-      </div>
+      </aside>
+    </template>
+
+    <!-- Add-fixture drawer -->
+    <template v-if="showAdd">
+      <div class="drawer-backdrop" @click="showAdd = false"></div>
+      <aside class="drawer" role="dialog" aria-label="Add a fixture">
+        <header class="drawer-head">
+          <div class="drawer-title">Add fixture</div>
+          <button class="btn drawer-close" @click="showAdd = false">Close ✕</button>
+        </header>
+        <div class="drawer-body">
+          <form class="add-form add-form-stack" @submit.prevent="submitFixture">
+            <div class="field"><label for="fxClub">Club</label>
+              <select id="fxClub" v-model="form.clubId">
+                <option v-for="c in CLUBS" :key="c.id" :value="c.id">{{ c.short }}</option>
+              </select></div>
+            <div class="field"><label for="fxOpp">Opponent</label>
+              <input id="fxOpp" v-model="form.opponent" required placeholder="e.g. Aston Villa"></div>
+            <div class="field"><label for="fxVenue">Venue</label>
+              <select id="fxVenue" v-model="form.venue">
+                <option value="H">Home</option><option value="A">Away</option><option value="N">Neutral</option>
+              </select></div>
+            <div class="field"><label for="fxComp">Competition</label>
+              <select id="fxComp" v-model="form.comp">
+                <option v-for="c in compOptions" :key="c">{{ c }}</option>
+              </select></div>
+            <div class="field"><label for="fxDate">Date</label>
+              <input id="fxDate" v-model="form.date" type="date" required></div>
+            <div class="field"><label for="fxTime">Kickoff (Central, optional)</label>
+              <input id="fxTime" v-model="form.time" type="time"></div>
+            <div class="field field-check"><label for="fxStar">Must-watch ★</label>
+              <input id="fxStar" v-model="form.mustWatch" type="checkbox"></div>
+            <div class="field"><button class="btn primary" type="submit">Add fixture</button></div>
+          </form>
+        </div>
+      </aside>
     </template>
   </div>
-
-  <h2 class="section-label">Add a fixture</h2>
-  <form class="add-form" @submit.prevent="submitFixture">
-    <div class="field"><label for="fxClub">Club</label>
-      <select id="fxClub" v-model="form.clubId">
-        <option v-for="c in CLUBS" :key="c.id" :value="c.id">{{ c.short }}</option>
-      </select></div>
-    <div class="field"><label for="fxOpp">Opponent</label>
-      <input id="fxOpp" v-model="form.opponent" required placeholder="e.g. Aston Villa"></div>
-    <div class="field"><label for="fxVenue">Venue</label>
-      <select id="fxVenue" v-model="form.venue">
-        <option value="H">Home</option><option value="A">Away</option><option value="N">Neutral</option>
-      </select></div>
-    <div class="field"><label for="fxComp">Competition</label>
-      <select id="fxComp" v-model="form.comp">
-        <option v-for="c in compOptions" :key="c">{{ c }}</option>
-      </select></div>
-    <div class="field"><label for="fxDate">Date</label>
-      <input id="fxDate" v-model="form.date" type="date" required></div>
-    <div class="field"><label for="fxTime">Kickoff (Central Time, optional)</label>
-      <input id="fxTime" v-model="form.time" type="time"></div>
-    <div class="field field-check"><label for="fxStar">Must-watch ★</label>
-      <input id="fxStar" v-model="form.mustWatch" type="checkbox"></div>
-    <div class="field"><button class="btn primary" type="submit">Add fixture</button></div>
-  </form>
 </template>
