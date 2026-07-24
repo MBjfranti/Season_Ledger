@@ -86,15 +86,15 @@ export const STADIUMS = {
 
 // heroPos: optional CSS background-position to control the hero crop (default "center 35%").
 export const CLUB_IMAGES = {
-  brighton:  { hero: "img/hero-brighton.jpg",  crest: "img/crest-brighton.png", heroPos: "center 72%", action: "img/brighton-action.png", actionPos: "center 30%" },
-  wrexham:   { hero: "img/hero-wrexham.jpg",   crest: "img/crest-wrexham.png", heroPos: "center 55%", action: "img/wrexham-action.png", actionPos: "center 22%" },
-  westbrom:  { hero: "img/hero-westbrom.jpg",  crest: "img/crest-westbrom.png", heroPos: "center 45%", action: "img/westbrom-action.png", actionPos: "center 28%" },
-  lincoln:   { hero: "img/hero-lincoln.jpg",   crest: "img/crest-lincoln.png", heroPos: "center 50%", action: "img/lincoln-action.png", actionPos: "center 25%" },
-  rennes:    { hero: "img/hero-rennes.jpg",    crest: "img/crest-rennes.png", heroPos: "center 55%", action: "img/rennes-action.png", actionPos: "center 20%" },
-  lorient:   { hero: "img/hero-lorient.jpg",   crest: "img/crest-lorient.png", heroPos: "center", action: "img/lorient-action.png", actionPos: "center 22%" },
-  deportivo: { hero: "img/hero-deportivo.jpg", crest: "img/crest-deportivo.png", heroPos: "center 12%", action: "img/deportivo-action.png", actionPos: "center 22%" },
-  milan:     { hero: "img/hero-milan.jpg",     crest: "img/crest-milan.png", heroPos: "center 60%", action: "img/milan-action.png", actionPos: "center 28%" },
-  bremen:    { hero: "img/hero-bremen.jpg",    crest: "img/crest-bremen.png", heroPos: "center 50%", action: "img/bremen-action.png", actionPos: "center 22%" },
+  brighton:  { hero: "img/hero-brighton.jpg",  crest: "img/crest-brighton.png", heroPos: "center 72%", action: "img/brighton-action.webp", actionPos: "center 30%" },
+  wrexham:   { hero: "img/hero-wrexham.jpg",   crest: "img/crest-wrexham.png", heroPos: "center 55%", action: "img/wrexham-action.webp", actionPos: "center 22%" },
+  westbrom:  { hero: "img/hero-westbrom.jpg",  crest: "img/crest-westbrom.png", heroPos: "center 45%", action: "img/westbrom-action.webp", actionPos: "center 28%" },
+  lincoln:   { hero: "img/hero-lincoln.jpg",   crest: "img/crest-lincoln.png", heroPos: "center 50%", action: "img/lincoln-action.webp", actionPos: "center 25%" },
+  rennes:    { hero: "img/hero-rennes.jpg",    crest: "img/crest-rennes.png", heroPos: "center 55%", action: "img/rennes-action.webp", actionPos: "center 20%" },
+  lorient:   { hero: "img/hero-lorient.jpg",   crest: "img/crest-lorient.png", heroPos: "center", action: "img/lorient-action.webp", actionPos: "center 22%" },
+  deportivo: { hero: "img/hero-deportivo.jpg", crest: "img/crest-deportivo.png", heroPos: "center 12%", action: "img/deportivo-action.webp", actionPos: "center 22%" },
+  milan:     { hero: "img/hero-milan.jpg",     crest: "img/crest-milan.png", heroPos: "center 60%", action: "img/milan-action.webp", actionPos: "center 28%" },
+  bremen:    { hero: "img/hero-bremen.jpg",    crest: "img/crest-bremen.png", heroPos: "center 50%", action: "img/bremen-action.webp", actionPos: "center 22%" },
 };
 
 // Each club's dominant kit colour — feeds the glass tile glow on the dashboard.
