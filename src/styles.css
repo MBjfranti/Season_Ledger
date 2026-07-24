@@ -1308,6 +1308,13 @@ h3.mini-day-head { margin: 0 0 2px; }
 /* ══ Courtyard atmosphere & motion ════════════════════════ */
 html { background-color: var(--grass); }
 
+/* On a club page, the pitch takes that club's colour (ClubView sets --club and
+   the data-attr). A deep team-tinted field, still readable as a pitch. */
+html[data-club-theme] {
+  --grass: color-mix(in srgb, var(--club) 42%, #16160f);
+  --grass-line: rgba(255,255,255,0.16);
+}
+
 /* Fixed shaft of daylight (or low lantern glow) behind everything.
    --sun-wash and --ember are interpolated continuously in atmosphere.js. */
 body::before {

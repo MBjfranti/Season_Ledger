@@ -1,6 +1,6 @@
 <script setup>
-import { computed } from "vue";
-import { LEAGUES, CLUB_IMAGES, CLUB_SITES, STADIUMS } from "../data/data.js";
+import { computed, watch, onUnmounted } from "vue";
+import { LEAGUES, CLUB_IMAGES, CLUB_SITES, STADIUMS, CLUB_COLORS } from "../data/data.js";
 import { state, recordFor, setPosition } from "../store.js";
 import { fmtDate, todayISO, resultLetter, matchupLabel, getOrdinal, clubById } from "../utils.js";
 import BcChip from "../components/BcChip.vue";
@@ -8,6 +8,24 @@ import ClubStrip from "../components/ClubStrip.vue";
 import FormChips from "../components/FormChips.vue";
 
 const props = defineProps({ id: { type: String, required: true } });
+
+// Tint the pitch to this club's colour while its page is open, keyed off the
+// route param (props.id). --grass is a plain :root token the clock engine never
+// touches, so an inline override on <html> is safe. The attribute holds the
+// active club id; on teardown we only clear if a newer page hasn't taken over
+// (routing recreates this component, so old-unmount can fire after new-setup).
+function paintPitch(id) {
+  const el = document.documentElement, c = CLUB_COLORS[id];
+  if (c) { el.style.setProperty("--club", c); el.setAttribute("data-club-theme", id); }
+  else { el.style.removeProperty("--club"); el.removeAttribute("data-club-theme"); }
+}
+watch(() => props.id, paintPitch, { immediate: true });
+onUnmounted(() => {
+  const el = document.documentElement;
+  if (el.getAttribute("data-club-theme") === props.id) {
+    el.style.removeProperty("--club"); el.removeAttribute("data-club-theme");
+  }
+});
 
 const club = computed(() => clubById(props.id));
 const league = computed(() => LEAGUES[club.value.league]);
