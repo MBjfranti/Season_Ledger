@@ -564,7 +564,18 @@ textarea:focus-visible, summary:focus-visible {
 .fixtures .club-tag a:hover { color: var(--text); }
 
 /* ── Club page ── */
-.club-hero { margin-bottom: 10px; }
+.club-hero { margin-bottom: 10px; display: flex; gap: 12px; align-items: stretch; }
+.hero-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.hero-main .hero-body { flex: 1; }
+/* The club's illustration as a tall poster beside the stadium hero */
+.hero-poster {
+  flex: none; width: 216px; align-self: stretch;
+  border-radius: var(--r-card); border: 1px solid var(--panel-edge);
+  box-shadow: var(--shadow-md); overflow: hidden;
+  background-color: color-mix(in srgb, var(--club, #1a1a12) 30%, #12120c);
+  background-size: cover; background-repeat: no-repeat;
+}
+@media (max-width: 760px) { .hero-poster { display: none; } }
 .club-hero .kit { height: 14px; border-radius: var(--r-card) var(--r-card) 0 0; }
 .club-hero .hero-body {
   background: var(--panel);

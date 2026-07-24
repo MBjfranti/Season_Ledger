@@ -71,8 +71,9 @@ const bandSegs = computed(() => {
     <router-link class="backlink" to="/">← All clubs</router-link>
 
     <div class="club-hero">
-      <div class="kit" :class="`kit-${club.id}`"></div>
-      <div class="hero-body has-photo" :style="heroStyle">
+      <div class="hero-main">
+        <div class="kit" :class="`kit-${club.id}`"></div>
+        <div class="hero-body has-photo" :style="heroStyle">
         <div class="hero-title">
           <img class="hero-crest" :src="images.crest" alt="" @error="e => e.target.remove()">
           <div>
@@ -86,7 +87,11 @@ const bandSegs = computed(() => {
           <div class="r">{{ record.w }}-{{ record.d }}-{{ record.l }}</div>
           <div class="l">{{ record.p }} played · {{ record.pts }} league pts</div>
         </div>
+        </div>
       </div>
+      <div v-if="images && images.action" class="hero-poster"
+           :style="{ backgroundImage: `url('${images.action}')`, backgroundPosition: images.actionPos || 'center 18%' }"
+           role="img" :aria-label="`${club.name} illustration`"></div>
     </div>
 
     <div class="two-col">
