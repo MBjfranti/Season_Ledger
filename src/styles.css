@@ -57,7 +57,7 @@
     radial-gradient(64% 46% at 100% 2%, rgba(214,150,92,0.16), rgba(214,150,92,0) 55%);
 
   /* Type */
-  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --display: "Archivo", system-ui, "Segoe UI", sans-serif;
   --sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   --prose: "Source Serif 4", Georgia, serif;
   --data: "IBM Plex Mono", Consolas, monospace;
@@ -283,7 +283,7 @@ button { font: inherit; cursor: pointer; }
 }
 
 .wordmark {
-  font-family: var(--display); font-weight: 700;
+  font-family: var(--display); font-stretch: 114%; font-weight: 700;
   font-size: clamp(21px, 2.5vw, 28px);
   letter-spacing: 0.005em; text-transform: uppercase; line-height: 0.95;
 }
@@ -380,7 +380,7 @@ textarea:focus-visible, summary:focus-visible {
 .club-strip a:hover { background: var(--panel-hover); transform: translateY(-1px); }
 .club-strip .kit { height: 6px; width: 100%; }
 .club-strip span {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 600;
   font-size: 15px;
   letter-spacing: 0.04em;
@@ -393,7 +393,7 @@ textarea:focus-visible, summary:focus-visible {
 
 /* ── Section headers ── */
 .section-label {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -430,7 +430,7 @@ textarea:focus-visible, summary:focus-visible {
 }
 .aggregate .cell:last-child { border-right: none; }
 .aggregate .num {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 700;
   font-size: 36px;
   line-height: 1;
@@ -493,7 +493,7 @@ textarea:focus-visible, summary:focus-visible {
 
 .card .body { padding: 18px 20px 20px; }
 .card h3 {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 600;
   font-size: 27px;
   letter-spacing: 0.01em;
@@ -553,7 +553,7 @@ textarea:focus-visible, summary:focus-visible {
   min-width: 172px;
 }
 .fixtures .club-tag {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 600;
   text-transform: uppercase;
   font-size: 16px;
@@ -604,7 +604,7 @@ textarea:focus-visible, summary:focus-visible {
 @media (max-width: 640px) { .hero-crest { height: 58px; } }
 @media (max-width: 640px) { .club-hero .hero-body.has-photo { min-height: 170px; } }
 .club-hero h2 {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 700;
   font-size: clamp(34px, 6vw, 56px);
   text-transform: uppercase;
@@ -630,7 +630,7 @@ textarea:focus-visible, summary:focus-visible {
 }
 .site-link:hover { border-color: #fff; background: rgba(0,0,0,0.42); }
 .club-hero .bigrecord { text-align: right; }
-.club-hero .bigrecord .r { font-family: var(--display); font-weight: 700; font-size: 44px; line-height: 1; }
+.club-hero .bigrecord .r { font-family: var(--display); font-stretch: 114%; font-weight: 700; font-size: 44px; line-height: 1; }
 .club-hero .bigrecord .l {
   font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--text-3); margin-top: 3px;
@@ -690,7 +690,7 @@ textarea:focus-visible, summary:focus-visible {
   padding: 14px 16px;
   box-shadow: var(--shadow-sm);
 }
-.stat .num { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1.1; }
+.stat .num { font-family: var(--display); font-stretch: 114%; font-weight: 700; font-size: 30px; line-height: 1.1; }
 .stat .lbl {
   font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--text-3); margin-top: 5px;
@@ -846,7 +846,7 @@ details.preview .prose { padding: 4px 22px 22px; }
   padding: 22px 0 4px;
 }
 .day-head {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 600;
   font-size: 20px;
   letter-spacing: 0.03em;
@@ -885,7 +885,7 @@ details.preview .prose { padding: 4px 22px 22px; }
 .fx-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .fx-time { font-family: var(--data); font-size: 13px; color: var(--text-2); margin-left: auto; }
 .fx-match {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 600; font-size: 23px;
   text-transform: uppercase; letter-spacing: 0.01em;
   line-height: 1.06;
@@ -919,7 +919,7 @@ details.preview .prose { padding: 4px 22px 22px; }
 /* Week-ahead mini schedule on the dashboard */
 .mini-day { margin-bottom: 16px; }
 .mini-day-head {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 600;
   font-size: 18px;
   letter-spacing: 0.03em;
@@ -937,7 +937,7 @@ details.preview .prose { padding: 4px 22px 22px; }
 }
 .mini-time { font-family: var(--data); font-size: 12.5px; color: var(--text-2); min-width: 92px; }
 .mini-match {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 600; font-size: 18px;
   text-transform: uppercase; letter-spacing: 0.01em;
 }
@@ -954,7 +954,7 @@ details.preview .prose { padding: 4px 22px 22px; }
   border-radius: var(--r-card);
 }
 .watch-next strong {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 600; font-size: 23px;
   text-transform: uppercase; letter-spacing: 0.01em;
 }
@@ -992,7 +992,7 @@ h3.mini-day-head { margin: 0 0 2px; }
 }
 .filter-chip {
   display: inline-flex; flex-direction: column;
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   cursor: pointer;
   border: 1px solid var(--panel-edge);
   border-radius: var(--r-ctrl);
@@ -1074,7 +1074,7 @@ h3.mini-day-head { margin: 0 0 2px; }
   display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
 }
 .watch-hero .wh-main strong {
-  font-family: var(--display);
+  font-family: var(--display); font-stretch: 114%;
   font-weight: 700; font-size: 28px;
   text-transform: uppercase; letter-spacing: 0.01em;
 }
@@ -1084,7 +1084,7 @@ h3.mini-day-head { margin: 0 0 2px; }
   display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
   padding: 4px 0; font-size: 14.5px;
 }
-.wh-b-match { font-family: var(--display); font-weight: 600; font-size: 18px; text-transform: uppercase; letter-spacing: 0.02em; }
+.wh-b-match { font-family: var(--display); font-stretch: 114%; font-weight: 600; font-size: 18px; text-transform: uppercase; letter-spacing: 0.02em; }
 .watch-hero .wn-link { display: inline-block; margin-top: 12px; font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: none; }
 .watch-hero .wn-link:hover { color: var(--accent-hover); }
 .kickoff-note { margin-top: 12px; font-size: 14.5px; color: var(--text-2); }
@@ -1180,7 +1180,7 @@ h3.mini-day-head { margin: 0 0 2px; }
 }
 .wp-tag { margin-bottom: 10px; }
 .wp-match {
-  font-family: var(--display); font-weight: 700;
+  font-family: var(--display); font-stretch: 114%; font-weight: 700;
   font-size: clamp(26px, 3vw, 40px); line-height: 0.98;
   text-transform: uppercase; letter-spacing: 0.01em;
   color: var(--text); text-decoration: none;
@@ -1191,7 +1191,7 @@ h3.mini-day-head { margin: 0 0 2px; }
 .watch-panel .reasons { margin-top: 10px; }
 .wp-backups { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--win-line); }
 .wp-backup { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px 0; font-size: 13px; color: var(--text-2); }
-.wp-b-match { font-family: var(--display); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text); }
+.wp-b-match { font-family: var(--display); font-stretch: 114%; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text); }
 .wp-b-meta { font-size: 12px; color: var(--text-3); }
 .wp-foot { margin-top: 14px; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .wp-kick { font-size: 13px; color: var(--text-2); }
@@ -1281,7 +1281,7 @@ h3.mini-day-head { margin: 0 0 2px; }
 .door:hover .door-crest { opacity: 0.22; }
 .door-body { position: relative; padding: 11px 13px 12px; display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0; }
 .door h3 {
-  font-family: var(--display); font-weight: 600;
+  font-family: var(--display); font-stretch: 114%; font-weight: 600;
   font-size: clamp(17px, 1.5vw, 21px); line-height: 1;
   text-transform: uppercase; letter-spacing: 0.01em; color: var(--text);
 }
@@ -1299,7 +1299,7 @@ h3.mini-day-head { margin: 0 0 2px; }
   overflow: hidden;
 }
 .ticker-label {
-  flex: none; font-family: var(--display); font-weight: 600;
+  flex: none; font-family: var(--display); font-stretch: 114%; font-weight: 600;
   font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent);
 }
 .ticker-row { display: flex; gap: 18px; overflow: hidden; white-space: nowrap; min-width: 0; }
@@ -1429,7 +1429,7 @@ body::after {
 .cell-tag { font-size: 9px; padding: 2px 7px; letter-spacing: 0.08em; }
 .cell-match {
   flex: none;
-  font-family: var(--display); font-weight: 600; font-size: 13.5px; line-height: 1.0;
+  font-family: var(--display); font-stretch: 80%; font-weight: 600; font-size: 14px; line-height: 1.0;
   text-transform: uppercase; letter-spacing: 0.01em; overflow-wrap: anywhere;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
@@ -1450,7 +1450,7 @@ body::after {
   flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 16px 18px; border-bottom: 1px solid var(--panel-edge);
 }
-.drawer-title { font-family: var(--display); font-weight: 700; font-size: 23px; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1; }
+.drawer-title { font-family: var(--display); font-stretch: 114%; font-weight: 700; font-size: 23px; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1; }
 .drawer-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
 /* Cards keep their full height and the body scrolls — otherwise the flex
    column shrinks them and overflow:hidden clips the actions off the bottom. */
