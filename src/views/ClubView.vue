@@ -143,7 +143,7 @@ const bandSegs = computed(() => {
         <div class="hero-body has-photo" :style="heroStyle">
         <div class="hero-title">
           <img class="hero-crest" :src="images.crest" alt="" @error="e => e.target.remove()">
-          <div>
+          <div class="hero-title-copy" :style="{ '--name-len': club.name.length }">
             <h2>{{ club.name }}</h2>
             <div class="sub">{{ league.name }} · {{ league.country }} · {{ club.manager }}</div>
             <div class="sub stadium-line">{{ stadium.name }} · {{ stadium.capacity.toLocaleString() }} capacity<template v-if="stadium.note"> ({{ stadium.note }})</template></div>

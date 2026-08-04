@@ -617,13 +617,30 @@ textarea:focus-visible, summary:focus-visible {
 }
 @media (max-width: 640px) { .hero-crest { height: 58px; } }
 @media (max-width: 640px) { .club-hero .hero-body.has-photo { min-height: 170px; } }
+/* The copy column is its own container, so the name can be sized against the
+   width actually available to it (column minus crest and gap). */
+/* flex:1 is essential: inline-size containment stops contents contributing to
+   width, so as a content-sized flex item this column collapsed to zero and every
+   name fell back to the minimum font size. Taking its width from the flex line
+   instead gives the container a real size to resolve cqi against. */
+.hero-title-copy { flex: 1 1 auto; min-width: 0; container-type: inline-size; }
+
 .club-hero h2 {
   font-family: var(--display); font-stretch: 114%;
   font-weight: 700;
-  font-size: clamp(34px, 6vw, 56px);
   text-transform: uppercase;
   letter-spacing: 0.005em;
   line-height: 0.92;
+  /* Always one line. CSS cannot measure text, so the size is derived from the
+     name's character count (--name-len, set by ClubView): 100cqi/len is the
+     width available per character, scaled by the font's average glyph ratio.
+     Short names hit the 56px ceiling; long ones shrink to fit rather than
+     wrapping onto a second line and shoving the record around. */
+  white-space: nowrap;
+  /* 1.28 ≈ 1 / 0.78, the widest average glyph ratio measured across the current
+     names (West Bromwich Albion is the tightest at ~0.75), leaving headroom for
+     glyph variation in names added later. */
+  font-size: clamp(22px, calc(100cqi / var(--name-len, 14) * 1.28), 56px);
 }
 .club-hero .sub { font-size: 15px; color: var(--text-2); margin-top: 10px; }
 .club-hero .stadium-line { margin-top: 3px; font-size: 13.5px; color: var(--text-3); }
