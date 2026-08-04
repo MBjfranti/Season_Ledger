@@ -5,6 +5,7 @@ import { state, toggleStar, toggleWatched, setFixtureNotes, addFixture,
 import { fmtDayHead, timeSortKey, addDaysISO, todayISO, fixtureScore,
          fixtureReasons, matchupLabel, clubById, broadcastFor } from "../utils.js";
 import BcChip from "../components/BcChip.vue";
+import { compAbbr, compSlug } from "../data/competitions.js";
 
 /* ── Filters ───────────────────────────────────────────── */
 const clubFilter = ref(new Set());
@@ -247,7 +248,10 @@ function submitFixture() {
             </div>
             <template v-if="c.count">
               <div class="cell-match">{{ matchupLabel(c.top) }}</div>
-              <div class="cell-time">{{ c.top.time || "Time TBD" }}</div>
+              <div class="cell-time">
+                {{ c.top.time || "Time TBD" }}
+                <span class="cell-comp">{{ compAbbr(c.top.comp) }}</span>
+              </div>
               <div class="cell-foot">
                 <span class="dc-kits"><span v-for="k in c.kits.slice(0, 4)" :key="k" class="kit" :class="`kit-${k}`"></span></span>
                 <span v-if="c.count > 1" class="dc-more">+{{ c.count - 1 }}</span>
@@ -281,7 +285,12 @@ function submitFixture() {
                 <span class="fx-time">{{ f.time || "Time TBD" }}</span>
               </div>
               <div class="fx-match">{{ matchupLabel(f) }}</div>
-              <div class="fx-meta"><span class="fx-comp">{{ f.comp }}</span> <BcChip :comp="f.comp" /></div>
+              <div class="fx-meta">
+                <router-link v-if="compSlug(f.comp)" class="fx-comp is-link"
+                             :to="`/competition/${compSlug(f.comp)}`">{{ f.comp }} ↗</router-link>
+                <span v-else class="fx-comp">{{ f.comp }}</span>
+                <BcChip :comp="f.comp" />
+              </div>
               <div v-if="displayReasons(f).length" class="reasons">{{ displayReasons(f).join(" · ") }}</div>
               <div v-if="f.notes" class="fx-note">“{{ f.notes }}”</div>
               <div class="fx-actions">

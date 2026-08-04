@@ -1,5 +1,9 @@
-// Seed data: the eight clubs, their leagues, forecasts, key fixtures and season previews.
-// Narratives are the owner's own 2026-27 previews, stored verbatim.
+// Seed data: the clubs, their leagues, forecasts, key fixtures and season previews.
+// Narratives are the owner's own 2026-27 previews, stored verbatim — EXCEPT where
+// a club carries `previewBy: "app"` (Barcelona, Real Madrid, PSG), which marks a
+// preview and forecast written for the app rather than by the owner. The club page
+// labels those, so the distinction stays visible and the owner's voice is not
+// silently put in anyone else's mouth.
 
 export const LEAGUES = {
   premierLeague: { name: "Premier League", country: "England", size: 20 },
@@ -366,9 +370,22 @@ export const CLUBS = [
     comps: ["La Liga", "Copa del Rey", "UEFA Champions League"],
     manager: "Hansi Flick",
     espnId: "83",
-    followByDefault: false,
-    keyFixtures: [],
-    preview: [],
+    forecast: { low: 1, high: 3, extra: "A title challenge, and a Champions League run that finally matches the league form." },
+    previewBy: "app",
+    keyFixtures: [
+      { label: "Real Madrid (H) — El Clásico", when: "Oct 25, 2026", date: "2026-10-25" },
+      { label: "Atlético Madrid (A)", when: "Nov 8, 2026", date: "2026-11-08" },
+      { label: "Dépor (A) at Riazor", when: "Nov 29, 2026", date: "2026-11-29" },
+      { label: "Real Madrid (A) — El Clásico, return", when: "May 9, 2027", date: "2027-05-09" },
+    ],
+    preview: [
+      "Barcelona enter 2026–27 in the strangest position a club of their size can occupy: sporting recovery running well ahead of institutional recovery. Hansi Flick's arrival restored a coherent identity — a high line, aggressive pressing, and a willingness to trust academy players in genuinely important matches — but the financial architecture underneath is still being rebuilt, and registration constraints have shaped every recent transfer window.",
+      "The football is the easy part to admire. Flick's teams defend far up the pitch and accept the risk that comes with it, which makes Barcelona both the most watchable and the most volatile of the elite European sides. When the offside trap works they suffocate opponents; when it fails they concede chances that look absurd for a team of their quality. There is very little middle ground, and that is precisely what makes them appointment viewing.",
+      "The Camp Nou question hangs over the season. The club is back at a partially reopened ground with capacity around 62,000, heading toward roughly 105,000 when the rebuild completes in 2027. That is a competitive advantage in waiting, but a phased reopening means an atmosphere still finding itself and a matchday revenue line that has not yet recovered to what the projections assume.",
+      "Domestically the pattern is set: Barcelona and Real Madrid will decide the title between them unless one of them collapses, and the schedule gives that argument two hearings — the Clásico at Camp Nou on October 25 and the return in Madrid on May 9, late enough to be decisive. Atlético remain the most likely third party.",
+      "Europe is where the season will actually be judged. A club with this squad and this coach is expected to be in the last eight, and recent Champions League exits have been the sort that linger. The new league phase suits them — eight matches gives a strong side room to absorb one bad night.",
+      "The forecast here: first to third in La Liga, with a Champions League run that finally matches the league form. This is a team good enough to win everything and structurally fragile enough to win nothing, which is the most entertaining combination available.",
+    ],
   },
   {
     id: "realmadrid",
@@ -379,21 +396,52 @@ export const CLUBS = [
     comps: ["La Liga", "Copa del Rey", "UEFA Champions League"],
     manager: "José Mourinho",
     espnId: "86",
-    followByDefault: false,
-    keyFixtures: [],
-    preview: [],
+    forecast: { low: 1, high: 3, extra: "The most interesting managerial experiment in Europe, whichever way it breaks." },
+    previewBy: "app",
+    keyFixtures: [
+      { label: "Atlético Madrid (A) — the derbi", when: "Sep 20, 2026", date: "2026-09-20" },
+      { label: "Barcelona (A) — El Clásico", when: "Oct 25, 2026", date: "2026-10-25" },
+      { label: "Dépor (A) at Riazor", when: "Dec 20, 2026", date: "2026-12-20" },
+      { label: "Barcelona (H) — El Clásico, return", when: "May 9, 2027", date: "2027-05-09" },
+    ],
+    preview: [
+      "Real Madrid begin 2026–27 with the most talked-about appointment in world football: José Mourinho, back at the Bernabéu more than a decade after a first spell that ended in open conflict with the dressing room, the press and half the club's own history. Whatever else this season produces, it will not be dull.",
+      "The tension is philosophical, not just personal. Real Madrid's identity under Ancelotti was built on trusting extravagant attacking players to resolve matches themselves, with structure kept deliberately loose. Mourinho's entire career has been an argument for the opposite: control, defensive shape, and the conviction that matches are won by denying the opponent rather than by out-creating them. Applying that to a squad assembled on the first premise is the central experiment.",
+      "There is a version of this that works spectacularly. Mourinho remains an exceptional cup manager, and the Champions League knockout rounds — two legs, fine margins, a premium on game management — are the exact environment his method was designed for. A squad this talented, drilled to defend properly, would be extremely hard to eliminate.",
+      "There is also a version where it curdles by February. His third seasons have historically been difficult, and even his first ones have involved public friction when senior players are asked to do unglamorous work. The Bernabéu crowd is not patient with pragmatism, and a Madrid side grinding out 1–0 wins will be booed even while winning.",
+      "The calendar offers early evidence: the derbi away to Atlético on September 20, then the Clásico at Camp Nou on October 25 — two matches that will tell you almost everything about whether the squad has bought in.",
+      "The forecast here: first to third, because the talent alone guarantees roughly that. But the interesting question is not where Madrid finish — it is whether the most successful pragmatist of his generation can still impose himself on a club built to be anything but pragmatic.",
+    ],
   },
   {
     id: "psg",
     name: "Paris Saint-Germain",
-    short: "PSG",
+    short: "Paris",
+    // Opponent matching is substring-based, and "Paris" appears inside "Paris FC"
+    // — a different Ligue 1 club that Rennes and Lorient both play. matchAs
+    // replaces the derived forms so the display short is never used to match,
+    // otherwise every Paris FC fixture would silently bind to PSG.
+    matchAs: ["Paris Saint-Germain", "PSG"],
     league: "ligue1",
     leagueComp: "Ligue 1",
     comps: ["Ligue 1", "Coupe de France", "UEFA Champions League"],
     manager: "Luis Enrique",
     espnId: "160",
-    followByDefault: false,
-    keyFixtures: [],
-    preview: [],
+    forecast: { low: 1, high: 2, extra: "Ligue 1 is the floor; the season is judged in Europe." },
+    previewBy: "app",
+    keyFixtures: [
+      { label: "Rennes (H) — opening night", when: "Aug 23, 2026", date: "2026-08-23" },
+      { label: "Marseille (A) — Le Classique", when: "Sep 20, 2026", date: "2026-09-20" },
+      { label: "Lorient (H)", when: "Nov 28, 2026", date: "2026-11-28" },
+      { label: "Marseille (H) — Le Classique, return", when: "Feb 7, 2027", date: "2027-02-07" },
+    ],
+    preview: [
+      "Paris Saint-Germain arrive at 2026–27 having finally answered the question that defined them for a decade. The galáctico model — assembling the most famous attackers available and hoping the arithmetic worked — was abandoned, and Luis Enrique was given permission to build a team instead of a shop window. The football has been better for it in every measurable way.",
+      "What replaced it is a genuine system: extreme positional discipline, a suffocating counter-press, full-backs who invert into midfield, and a willingness to hand major responsibility to players in their early twenties. It is demanding to execute and unusually coherent for a club with PSG's resources, and it has made them a side neutrals actively want to watch rather than one they resent.",
+      "Domestically this creates a strange problem. Ligue 1 at eighteen clubs is not a serious test for this squad — the title is close to a formality, and the risk is a team that spends autumn under-stimulated. The genuine domestic drama is confined to Le Classique against Marseille, away on September 20 and at the Parc on February 7, and to the occasional Coupe de France trip somewhere cold and hostile.",
+      "So the season is really about Europe, and specifically about whether the new league phase helps or hurts them. Eight matches against seeded opposition is a better test than the old group stage, and PSG's method — high risk, high control — is far better suited to knockout football than the previous incarnation's reliance on individual moments.",
+      "The Parc des Princes remains a complication in the background. The club's long-running attempt to buy or replace a stadium it does not own is unresolved, and at under 48,000 it is comfortably the smallest home ground of any European superclub.",
+      "The forecast here: first or second in Ligue 1, which is close to a given. The real measure is whether a properly coached PSG can convert its structural advantage into the European result the previous model never managed.",
+    ],
   },
 ];

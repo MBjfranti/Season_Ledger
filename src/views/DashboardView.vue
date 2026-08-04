@@ -29,8 +29,18 @@ const clubs = computed(() => activeClubs.value.map(c => ({
 
 // Keep the tiles near-square as the slate grows: widen to more columns before
 // stacking more rows, since the wall has more width than height to give.
-// Nine clubs still lay out 3x3, as they always did.
-const gridCols = computed(() => Math.max(3, Math.ceil(Math.sqrt(clubs.value.length))));
+// Nine clubs still lay out 3x3, as they always did. A single club is the one
+// exception — it takes the full width as a featured band rather than sitting
+// alone in a corner.
+const gridCols = computed(() => {
+  const n = clubs.value.length;
+  return n === 1 ? 1 : Math.max(3, Math.ceil(Math.sqrt(n)));
+});
+
+// Row slots stay at three minimum so cards keep a sane height when the slate is
+// short; beyond nine clubs the count grows to fit.
+const gridRows = computed(() =>
+  Math.max(3, Math.ceil(clubs.value.length / gridCols.value)));
 
 // The watch plan: the next DAY that has fixtures, ranked the way the calendar
 // ranks it — that day's top pick as Watch, up to two same-day Backups.
@@ -121,7 +131,7 @@ const tickerFixtures = computed(() => (weekAhead.value.length ? weekAhead.value 
     </section>
 
     <section class="nine-area">
-      <div class="nine-grid" :style="{ '--cols': gridCols }">
+      <div class="nine-grid" :style="{ '--cols': gridCols, '--rows': gridRows }">
         <router-link v-for="c in clubs" :key="c.id" class="door" :to="`/club/${c.id}`"
                      :style="{ '--club': CLUB_COLORS[c.id] }">
           <div class="kit" :class="`kit-${c.id}`"></div>

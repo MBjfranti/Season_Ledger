@@ -543,7 +543,8 @@ export const SEED_FIXTURES = (() => {
   const findOpp = (clubId, name) => {
     const n = name.toLowerCase();
     const hit = CLUBS.find(c => c.id !== clubId && LEAGUE_FIXTURES[c.id] &&
-      [c.short, c.name, ...(c.aliases || [])].some(f => n.includes(f.toLowerCase())));
+      (c.matchAs || [c.short, c.name, ...(c.aliases || [])])
+        .some(f => n.includes(f.toLowerCase())));
     return hit ? hit.id : undefined;
   };
   const out = [];

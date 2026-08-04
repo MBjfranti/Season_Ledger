@@ -13,8 +13,10 @@ export const clubById = id => CLUBS.find(c => c.id === id);
 // Every string that should identify a club inside an opponent name. Clubs whose
 // display short is a nickname ("Barça") carry aliases so the plain form still
 // matches — otherwise the matchup is stored once per side instead of shared.
+// matchAs overrides the lot, for shorts that would false-positive against
+// another club ("Paris" inside "Paris FC").
 export const clubNameForms = c =>
-  [c.short, c.name, ...(c.aliases || [])].map(s => s.toLowerCase());
+  (c.matchAs || [c.short, c.name, ...(c.aliases || [])]).map(s => s.toLowerCase());
 
 export function fmtDate(iso) {
   if (!iso) return "TBD";

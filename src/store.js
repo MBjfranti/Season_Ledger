@@ -41,6 +41,65 @@ watch(state, () => {
   localStorage.setItem(LS_KEY, JSON.stringify(state));
 }, { deep: true });
 
+/* ── Follow-by-URL ─────────────────────────────────────── */
+
+// ?f=bar or ?f=bar,wre narrows the slate to EXACTLY those clubs — useful for
+// sharing a link to one club's season. A code is any unambiguous prefix of a
+// club's id, short name or alias, so "bar", "barca" and "barcelona" all reach
+// Barcelona and "par" reaches Paris. Ambiguous codes ("b" hits Brighton, Bremen
+// and Barcelona) and unknown ones are ignored rather than guessed at.
+const normalize = s => s.toLowerCase()
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Barça -> barca, Dépor -> depor
+  .replace(/[^a-z0-9]/g, "");
+
+const codeKeys = c => [...new Set(
+  [c.id, c.short, c.name, ...(c.aliases || []), ...(c.matchAs || [])].map(normalize))];
+
+function clubsForCode(code) {
+  const c = normalize(code);
+  if (!c) return [];
+  const exact = CLUBS.filter(x => codeKeys(x).includes(c));
+  if (exact.length) return exact;
+  return CLUBS.filter(x => codeKeys(x).some(k => k.startsWith(c)));
+}
+
+function applyFollowParam() {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  // vue-router is on hash history, so the query can sit before the hash
+  // (?f=bar) or inside it (#/calendar?f=bar). Accept either.
+  const hashQ = url.hash.includes("?") ? url.hash.slice(url.hash.indexOf("?") + 1) : "";
+  const raw = url.searchParams.get("f") ?? new URLSearchParams(hashQ).get("f");
+  if (raw === null) return;
+
+  const ids = [];
+  for (const code of raw.split(",")) {
+    const hits = clubsForCode(code);
+    if (hits.length === 1 && !ids.includes(hits[0].id)) ids.push(hits[0].id);
+  }
+
+  // A parameter that resolves to nothing leaves the slate alone: blanking every
+  // club would strand the user on an empty ledger. Either way the parameter is
+  // consumed, so switching clubs in the settings menu afterwards is not silently
+  // undone by a refresh, and a junk code does not linger in the address bar.
+  if (ids.length) {
+    const prefs = {};
+    for (const c of CLUBS) prefs[c.id] = ids.includes(c.id);
+    state.clubPrefs = prefs;
+  }
+
+  url.searchParams.delete("f");
+  if (hashQ) {
+    const hp = new URLSearchParams(hashQ);
+    hp.delete("f");
+    const base = url.hash.slice(0, url.hash.indexOf("?"));
+    url.hash = hp.toString() ? `${base}?${hp}` : base;
+  }
+  window.history.replaceState(null, "", url);
+}
+
+applyFollowParam();
+
 // Fold any fixtures from fixtures.js into saved state. A club plays at most one
 // match per day, so clubId+date identifies a fixture. Skips dates already
 // covered by a stored fixture or a logged match.

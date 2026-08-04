@@ -1232,6 +1232,90 @@ h3.mini-day-head { margin: 0 0 2px; }
 .atmos-range { width: 100%; accent-color: var(--accent); cursor: pointer; }
 .atmos-hint { font-size: 11.5px; color: var(--text-3); margin-top: 8px; font-style: italic; }
 
+/* Marks a preview the app wrote rather than the owner. */
+.by-tag {
+  margin-left: 8px; padding: 1px 7px; border-radius: 999px;
+  font-family: var(--data); font-size: 9.5px; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--text-3);
+  border: 1px solid var(--panel-edge); vertical-align: 2px;
+}
+
+/* ══ Competition pages ════════════════════════════════════ */
+.cell-comp {
+  display: inline-block; margin-left: 5px; padding: 0 4px;
+  font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-3); border: 1px solid var(--panel-edge); border-radius: 4px;
+  vertical-align: 1px; white-space: nowrap;
+}
+.fx-comp.is-link { color: var(--accent); text-decoration: none; }
+.fx-comp.is-link:hover { text-decoration: underline; }
+
+.comp-hero {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap;
+  margin: 8px 0 18px; padding: 20px 22px;
+  border-radius: var(--r-card);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--glass-fill), var(--glass-fill)) padding-box,
+    linear-gradient(140deg, var(--glass-hi), transparent 55%, var(--glass-lo)) border-box;
+  box-shadow: inset 0 1px 0 var(--glass-stroke), var(--shadow-sm);
+}
+.comp-hero h2 { margin: 2px 0 4px; font-size: clamp(26px, 4vw, 40px); line-height: 1.05; }
+.comp-eyebrow {
+  font-family: var(--data); font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-3);
+}
+.comp-format { font-size: 13.5px; color: var(--text-2); }
+.comp-hero-side { text-align: right; }
+.comp-bc-note { margin-top: 6px; font-size: 11.5px; color: var(--text-3); font-style: italic; }
+
+.comp-cols { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 22px; }
+@media (max-width: 900px) { .comp-cols { grid-template-columns: 1fr; } }
+.comp-prose p { margin: 0 0 12px; }
+
+.comp-list { list-style: none; margin: 0 0 8px; padding: 0; }
+.comp-list li {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 7px 2px; border-bottom: 1px solid var(--panel-edge);
+  font-size: 13px;
+}
+.cl-date { font-family: var(--data); font-size: 11.5px; color: var(--text-3); flex: none; min-width: 128px; }
+.cl-match { flex: 1 1 auto; color: var(--text); }
+.cl-time { font-family: var(--data); font-size: 11.5px; color: var(--text-3); flex: none; }
+.cl-score { font-family: var(--data); font-size: 12px; font-weight: 700; flex: none; }
+
+.comp-pick {
+  padding: 14px 16px; margin-bottom: 16px;
+  border-radius: var(--r-card); border: 1px solid var(--panel-edge);
+  background: var(--panel);
+}
+.cp-eyebrow {
+  font-family: var(--data); font-size: 10.5px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--text-3); margin-bottom: 4px;
+}
+.cp-match { font-weight: 700; font-size: 16px; line-height: 1.15; }
+.cp-when { font-size: 12.5px; color: var(--text-2); margin-top: 3px; }
+.cp-rating { margin-top: 8px; font-family: var(--data); font-size: 11.5px; color: var(--accent); }
+
+.comp-facts { margin-bottom: 6px; }
+.comp-facts > div {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 6px 2px; border-bottom: 1px solid var(--panel-edge); font-size: 13px;
+}
+.comp-facts span:first-child { color: var(--text-3); }
+
+.comp-clubs { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.comp-clubs a {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 10px 5px 7px; border-radius: 999px;
+  border: 1px solid var(--panel-edge); background: var(--panel);
+  text-decoration: none; color: var(--text); font-size: 13px;
+}
+.comp-clubs a:hover { border-color: var(--club, var(--accent)); }
+.comp-clubs img { width: 18px; height: 18px; object-fit: contain; }
+.comp-clubs .kit { width: 14px; height: 8px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--kit-edge); }
+
 /* Club picker — the settings popover is taller than the old clock, so it
    scrolls inside itself rather than running off the viewport. */
 .settings-pop { width: 268px; max-height: min(70vh, 520px); overflow-y: auto; }
@@ -1381,6 +1465,10 @@ h3.mini-day-head { margin: 0 0 2px; }
   height: 100%;
   display: grid;
   grid-template-columns: repeat(var(--cols, 3), 1fr);
+  /* Explicit row slots rather than auto rows: a single club would otherwise
+     stretch its card to the full height of the wall. --rows never drops below
+     three, so one card is a full-width band a third of the way down. */
+  grid-template-rows: repeat(var(--rows, 3), minmax(0, 1fr));
   grid-auto-rows: minmax(0, 1fr);
   gap: 12px;
   min-height: 0;

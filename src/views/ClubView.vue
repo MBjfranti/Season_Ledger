@@ -167,7 +167,10 @@ const bandSegs = computed(() => {
         </div>
 
         <template v-if="club.preview && club.preview.length">
-          <h2 class="section-label">Season preview</h2>
+          <h2 class="section-label">
+            Season preview
+            <span v-if="club.previewBy === 'app'" class="by-tag">written for the app</span>
+          </h2>
           <details class="preview">
             <summary>Read the full preview</summary>
             <div class="prose"><p v-for="(p, i) in club.preview" :key="i">{{ p }}</p></div>
