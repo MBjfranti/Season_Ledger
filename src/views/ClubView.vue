@@ -35,10 +35,20 @@ const site = computed(() => CLUB_SITES[props.id]);
 const record = computed(() => recordFor(props.id));
 const pos = computed(() => state.positions[props.id]);
 
-const heroStyle = computed(() => ({
-  backgroundImage: `linear-gradient(180deg, rgba(18,24,31,0.25) 0%, rgba(18,24,31,0.55) 55%, rgba(18,24,31,0.9) 100%), url('${images.value.hero}')`,
-  backgroundPosition: images.value.heroPos || "center 35%",
-}));
+// Clubs without a stadium photo wash the banner in their kit colour instead of
+// resolving url('undefined').
+const heroStyle = computed(() => {
+  const scrim = "linear-gradient(180deg, rgba(18,24,31,0.25) 0%, rgba(18,24,31,0.55) 55%, rgba(18,24,31,0.9) 100%)";
+  const hero = images.value?.hero;
+  if (!hero) {
+    const tint = CLUB_COLORS[props.id] || "#1b2530";
+    return { backgroundImage: `${scrim}, linear-gradient(160deg, ${tint} 0%, #12181f 90%)` };
+  }
+  return {
+    backgroundImage: `${scrim}, url('${hero}')`,
+    backgroundPosition: images.value.heroPos || "center 35%",
+  };
+});
 
 // Results and fixtures are one thing — the season — so they share one wall of
 // cards in date order: everything played, then everything still to come.
@@ -106,11 +116,13 @@ watch(() => props.id, () => nextTick(scrollToNext));
 
 // Forecast band: one segment per league place, highlighting the forecast range.
 const bandSegs = computed(() => {
+  const fc = club.value?.forecast;
+  if (!fc) return []; // catalog club carrying no personal forecast
   const segs = [];
   for (let i = 1; i <= league.value.size; i++) {
     segs.push({
       pos: i,
-      inBand: i >= club.value.forecast.low && i <= club.value.forecast.high,
+      inBand: i >= fc.low && i <= fc.high,
       current: i === pos.value,
     });
   }
@@ -154,11 +166,13 @@ const bandSegs = computed(() => {
           <div class="stat"><div class="num"><FormChips :form="record.form" /></div><div class="lbl">Form (last 5)</div></div>
         </div>
 
-        <h2 class="section-label">Season preview</h2>
-        <details class="preview">
-          <summary>Read the full preview</summary>
-          <div class="prose"><p v-for="(p, i) in club.preview" :key="i">{{ p }}</p></div>
-        </details>
+        <template v-if="club.preview && club.preview.length">
+          <h2 class="section-label">Season preview</h2>
+          <details class="preview">
+            <summary>Read the full preview</summary>
+            <div class="prose"><p v-for="(p, i) in club.preview" :key="i">{{ p }}</p></div>
+          </details>
+        </template>
 
         <h2 class="section-label">The season</h2>
         <template v-if="timeline.length">
@@ -198,26 +212,31 @@ const bandSegs = computed(() => {
         </div>
 
         <div class="band-wrap">
-          <h2 class="section-label" style="margin:0 0 4px">Forecast: {{ club.forecast.low }}{{ getOrdinal(club.forecast.low) }}–{{ club.forecast.high }}{{ getOrdinal(club.forecast.high) }}</h2>
-          <div class="band-row">
-            <div v-for="s in bandSegs" :key="s.pos" class="band-seg"
-                 :class="{ 'in-band': s.inBand, current: s.current }"
-                 :title="`${s.pos}${getOrdinal(s.pos)}`"></div>
-          </div>
-          <div class="band-legend"><span>1st</span><span>{{ league.size }}{{ getOrdinal(league.size) }}</span></div>
+          <h2 v-if="club.forecast" class="section-label" style="margin:0 0 4px">Forecast: {{ club.forecast.low }}{{ getOrdinal(club.forecast.low) }}–{{ club.forecast.high }}{{ getOrdinal(club.forecast.high) }}</h2>
+          <h2 v-else class="section-label" style="margin:0 0 4px">League position</h2>
+          <template v-if="club.forecast">
+            <div class="band-row">
+              <div v-for="s in bandSegs" :key="s.pos" class="band-seg"
+                   :class="{ 'in-band': s.inBand, current: s.current }"
+                   :title="`${s.pos}${getOrdinal(s.pos)}`"></div>
+            </div>
+            <div class="band-legend"><span>1st</span><span>{{ league.size }}{{ getOrdinal(league.size) }}</span></div>
+          </template>
           <div class="band-current">Currently: {{ pos ? pos + getOrdinal(pos) : "not set" }}</div>
           <div class="pos-controls">
             <label for="posInput">Current position</label>
             <input id="posInput" type="number" min="1" :max="league.size" :value="pos || ''"
                    placeholder="—" @change="e => setPosition(id, e.target.value)">
           </div>
-          <div class="band-note">{{ club.forecast.extra }}</div>
+          <div v-if="club.forecast" class="band-note">{{ club.forecast.extra }}</div>
         </div>
 
-        <h2 class="section-label">Key dates</h2>
-        <ul class="fixtures">
-          <li v-for="(k, i) in club.keyFixtures" :key="i"><span class="when">{{ k.when }}</span><span>{{ k.label }}</span></li>
-        </ul>
+        <template v-if="club.keyFixtures && club.keyFixtures.length">
+          <h2 class="section-label">Key dates</h2>
+          <ul class="fixtures">
+            <li v-for="(k, i) in club.keyFixtures" :key="i"><span class="when">{{ k.when }}</span><span>{{ k.label }}</span></li>
+          </ul>
+        </template>
       </div>
     </div>
   </template>

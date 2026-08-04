@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, nextTick, watch } from "vue";
-import { CLUBS } from "../data/data.js";
-import { state, toggleStar, toggleWatched, setFixtureNotes, addFixture } from "../store.js";
+import { state, toggleStar, toggleWatched, setFixtureNotes, addFixture,
+         activeClubs, activeFixtures } from "../store.js";
 import { fmtDayHead, timeSortKey, addDaysISO, todayISO, fixtureScore,
          fixtureReasons, matchupLabel, clubById, broadcastFor } from "../utils.js";
 import BcChip from "../components/BcChip.vue";
@@ -13,7 +13,7 @@ const watchableOnly = ref(false);
 
 const allComps = computed(() => {
   const seen = new Set();
-  for (const c of CLUBS) for (const comp of c.comps) seen.add(comp);
+  for (const c of activeClubs.value) for (const comp of c.comps) seen.add(comp);
   return [...seen];
 });
 
@@ -45,7 +45,7 @@ function passesFilters(f) {
    Grouping by day (not week) so a busy stretch surfaces a pick
    every matchday instead of one lone pick for the whole week. */
 const days = computed(() => {
-  const dated = state.fixtures.filter(f => f.date && passesFilters(f))
+  const dated = activeFixtures.value.filter(f => f.date && passesFilters(f))
     .sort((a, b) => a.date.localeCompare(b.date));
   const byDay = new Map();
   for (const f of dated) {
@@ -174,7 +174,8 @@ function saveNote(f) {
 
 /* ── Add-fixture drawer ────────────────────────────────── */
 const showAdd = ref(false);
-const form = ref({ clubId: CLUBS[0].id, opponent: "", venue: "H", comp: CLUBS[0].comps[0], date: "", time: "", mustWatch: false });
+const form = ref({ clubId: activeClubs.value[0]?.id || "", opponent: "", venue: "H",
+                   comp: activeClubs.value[0]?.comps[0] || "", date: "", time: "", mustWatch: false });
 const compOptions = computed(() => clubById(form.value.clubId)?.comps || []);
 watch(() => form.value.clubId, () => { form.value.comp = compOptions.value[0]; });
 
@@ -202,7 +203,7 @@ function submitFixture() {
               :aria-pressed="!clubFilter.size" @click="clubFilter = new Set()">
         <span class="fc-label">All</span>
       </button>
-      <button v-for="c in CLUBS" :key="c.id" class="filter-chip"
+      <button v-for="c in activeClubs" :key="c.id" class="filter-chip"
               :class="{ active: clubFilter.has(c.id) }" :aria-pressed="clubFilter.has(c.id)"
               @click="toggleClubFilter(c.id)">
         <span class="kit" :class="`kit-${c.id}`"></span><span class="fc-label">{{ c.short }}</span>
@@ -313,7 +314,7 @@ function submitFixture() {
           <form class="add-form add-form-stack" @submit.prevent="submitFixture">
             <div class="field"><label for="fxClub">Club</label>
               <select id="fxClub" v-model="form.clubId">
-                <option v-for="c in CLUBS" :key="c.id" :value="c.id">{{ c.short }}</option>
+                <option v-for="c in activeClubs" :key="c.id" :value="c.id">{{ c.short }}</option>
               </select></div>
             <div class="field"><label for="fxOpp">Opponent</label>
               <input id="fxOpp" v-model="form.opponent" required placeholder="e.g. Aston Villa"></div>

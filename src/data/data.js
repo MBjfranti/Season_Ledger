@@ -31,6 +31,8 @@ export const BROADCAST = {
   "DFB-Pokal":               [{ svc: "Check listings", have: false, note: "US rights TBD post-ESPN" }],
   "UEFA Conference League":  [{ svc: "Paramount+", have: true }],
   "UEFA Europa League":      [{ svc: "Paramount+", have: true }],
+  "UEFA Champions League":   [{ svc: "Paramount+", have: true },
+                              { svc: "TUDN", have: false, note: "Esp." }],
 };
 
 // Derby / rivalry opponents per club (matched by substring, case-insensitive).
@@ -44,6 +46,9 @@ export const RIVALS = {
   deportivo: ["Celta"],
   milan:     ["Inter", "Juventus", "Genoa"],
   bremen:    ["Hamburg", "HSV"],
+  barcelona: ["Real Madrid", "Espanyol"],
+  realmadrid: ["Barcelona", "Atlético", "Atletico"],
+  psg:       ["Marseille", "Lyon"],
 };
 
 // Marquee opponents per league — a match against these is worth watching.
@@ -69,6 +74,9 @@ export const CLUB_SITES = {
   deportivo: "https://www.rcdeportivo.es",
   milan:     "https://www.acmilan.com",
   bremen:    "https://www.werder.de",
+  barcelona: "https://www.fcbarcelona.com",
+  realmadrid: "https://www.realmadrid.com",
+  psg:       "https://www.psg.fr",
 };
 
 // Stadium name + capacity shown on club banners (verified July 2026).
@@ -82,6 +90,9 @@ export const STADIUMS = {
   deportivo: { name: "Estadio Abanca-Riazor", capacity: 32490 },
   milan:     { name: "San Siro (Stadio Giuseppe Meazza)", capacity: 75817 },
   bremen:    { name: "Weserstadion", capacity: 42100 },
+  barcelona: { name: "Spotify Camp Nou", capacity: 62652, note: "phased reopening; ~105,000 when the rebuild completes in 2027" },
+  realmadrid: { name: "Santiago Bernabéu", capacity: 78297 },
+  psg:       { name: "Parc des Princes", capacity: 47929 },
 };
 
 // heroPos: optional CSS background-position to control the hero crop (default "center 35%").
@@ -95,16 +106,30 @@ export const CLUB_IMAGES = {
   deportivo: { hero: "img/hero-deportivo.jpg", crest: "img/crest-deportivo.png", heroPos: "center 12%", action: "img/deportivo-action.webp", actionPos: "center 22%" },
   milan:     { hero: "img/hero-milan.jpg",     crest: "img/crest-milan.png", heroPos: "center 60%", action: "img/milan-action.webp", actionPos: "center 28%" },
   bremen:    { hero: "img/hero-bremen.jpg",    crest: "img/crest-bremen.png", heroPos: "center 50%", action: "img/bremen-action.webp", actionPos: "center 22%" },
+  // Catalog clubs: action art only for now, so the banner falls back to a kit-colour wash.
+  barcelona:  { action: "img/barcelona-action.webp", actionPos: "center 25%" },
+  realmadrid: { action: "img/real-madrid-action.webp", actionPos: "center 25%" },
+  psg:        { action: "img/psg-action.webp", actionPos: "center 25%" },
 };
 
 // Each club's dominant kit colour — feeds the glass tile glow on the dashboard.
 export const CLUB_COLORS = {
   brighton: "#0057b8", wrexham: "#d2242a", lincoln: "#d0021b", westbrom: "#1e3f86",
   rennes: "#e13327", lorient: "#ff7f27", deportivo: "#0d5eaf", milan: "#d40000", bremen: "#169152",
+  barcelona: "#a50044", realmadrid: "#febe10", psg: "#004170",
 };
 
 // Full fixture lists live in fixtures.js (SEED_FIXTURES); results drops in results.js.
 
+// CLUBS is the *catalog*, not the followed slate. Two optional flags:
+//   followByDefault: false — present in the catalog but off until switched on.
+//   seeded: false          — no hand-gathered fixture list in fixtures.js, so
+//                            fixtures must come from the API. Unseeded clubs are
+//                            also skipped by opponent auto-matching: otherwise a
+//                            tracked club's away trip to them would be dropped
+//                            from the seed on the assumption they carry it.
+// Clubs without a `forecast`/`preview` are catalog entries carrying no personal
+// prediction; the club page hides those sections rather than inventing one.
 export const CLUBS = [
   {
     id: "brighton",
@@ -317,5 +342,47 @@ export const CLUBS = [
       "Werder open away to Freiburg before hosting RB Leipzig—a demanding start that should test their organization. The emotional centerpiece is the Nordderby against Hamburg in November, with the return meeting scheduled for March.",
       "My forecast: 9th–13th. Werder are unlikely to threaten Bayern or Dortmund, but a stable top-half chase, youth development and two fierce northern derbies should make them an excellent Bundesliga club to follow.",
     ],
+  },
+  {
+    id: "barcelona",
+    name: "FC Barcelona",
+    short: "Barcelona",
+    league: "laLiga",
+    leagueComp: "La Liga",
+    comps: ["La Liga", "Copa del Rey", "UEFA Champions League"],
+    manager: "Hansi Flick",
+    espnId: "83",
+    followByDefault: false,
+    seeded: false,
+    keyFixtures: [],
+    preview: [],
+  },
+  {
+    id: "realmadrid",
+    name: "Real Madrid",
+    short: "Real Madrid",
+    league: "laLiga",
+    leagueComp: "La Liga",
+    comps: ["La Liga", "Copa del Rey", "UEFA Champions League"],
+    manager: "José Mourinho",
+    espnId: "86",
+    followByDefault: false,
+    seeded: false,
+    keyFixtures: [],
+    preview: [],
+  },
+  {
+    id: "psg",
+    name: "Paris Saint-Germain",
+    short: "PSG",
+    league: "ligue1",
+    leagueComp: "Ligue 1",
+    comps: ["Ligue 1", "Coupe de France", "UEFA Champions League"],
+    manager: "Luis Enrique",
+    espnId: "160",
+    followByDefault: false,
+    seeded: false,
+    keyFixtures: [],
+    preview: [],
   },
 ];

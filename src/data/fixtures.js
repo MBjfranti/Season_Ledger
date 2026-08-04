@@ -413,9 +413,12 @@ export const MOVED_FIXTURES = [
 // Build the seed list app.js merges into saved state. Matchups between two
 // tracked clubs are stored once, under the home club, with opponentId set.
 export const SEED_FIXTURES = (() => {
+  // Only clubs that carry their own fixture list above can absorb a matchup:
+  // an away tie is dropped on the assumption the home club's entry keeps it, so
+  // matching a club with no list here would silently lose the fixture entirely.
   const findOpp = (clubId, name) => {
     const n = name.toLowerCase();
-    const hit = CLUBS.find(c => c.id !== clubId &&
+    const hit = CLUBS.find(c => c.id !== clubId && LEAGUE_FIXTURES[c.id] &&
       (n.includes(c.short.toLowerCase()) || n.includes(c.name.toLowerCase())));
     return hit ? hit.id : undefined;
   };

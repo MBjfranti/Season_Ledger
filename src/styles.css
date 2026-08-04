@@ -248,6 +248,9 @@ button { font: inherit; cursor: pointer; }
 /* ── Masthead: a frosted bar floating over the pitch ── */
 .masthead {
   flex: none;
+  /* Owns a stacking context above the board so the settings popover is not
+     painted over by the club tiles below it. */
+  position: relative; z-index: 70;
   display: flex; align-items: center; justify-content: space-between;
   gap: 16px; flex-wrap: wrap;
   margin: 14px 0 14px; padding: 11px 14px;
@@ -490,6 +493,11 @@ textarea:focus-visible, summary:focus-visible {
 .kit-milan     { background: repeating-linear-gradient(90deg, #d40000 0 12px, #111111 12px 24px); }
 .kit-bremen    { background: linear-gradient(115deg, #169152 0 40%, #ffffff 40% 56%, #169152 56%); }
 .kit-westbrom  { background: repeating-linear-gradient(90deg, #122f67 0 16px, #ffffff 16px 32px); }
+/* Catalog clubs: blaugrana stripes, Madrid's white with the gold trim, and the
+   Hechter band down the middle of PSG's navy. */
+.kit-barcelona  { background: repeating-linear-gradient(90deg, #a50044 0 14px, #004d98 14px 28px); }
+.kit-realmadrid { background: linear-gradient(90deg, #ffffff 0 44%, #febe10 44% 56%, #ffffff 56%); }
+.kit-psg        { background: linear-gradient(90deg, #004170 0 38%, #ffffff 38% 43%, #e30613 43% 57%, #ffffff 57% 62%, #004170 62%); }
 
 .card .body { padding: 18px 20px 20px; }
 .card h3 {
@@ -1217,6 +1225,26 @@ h3.mini-day-head { margin: 0 0 2px; }
 }
 .atmos-range { width: 100%; accent-color: var(--accent); cursor: pointer; }
 .atmos-hint { font-size: 11.5px; color: var(--text-3); margin-top: 8px; font-style: italic; }
+
+/* Club picker — the settings popover is taller than the old clock, so it
+   scrolls inside itself rather than running off the viewport. */
+.settings-pop { width: 268px; max-height: min(70vh, 520px); overflow-y: auto; }
+.set-group { margin-bottom: 10px; }
+.set-league {
+  font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--text-3); margin: 8px 0 4px;
+}
+.set-row {
+  display: flex; align-items: center; gap: 8px; padding: 4px 2px;
+  cursor: pointer; border-radius: 6px;
+}
+.set-row:hover { background: var(--panel-edge); }
+.set-row input { accent-color: var(--accent); cursor: pointer; margin: 0; }
+.set-name { font-size: 13px; color: var(--text); }
+.set-tag {
+  margin-left: auto; font-size: 10px; color: var(--text-3);
+  border: 1px solid var(--panel-edge); border-radius: 999px; padding: 1px 6px;
+}
 
 /* ══ The Ledger board — a single screen, no scroll ════════ */
 .board {

@@ -1,7 +1,7 @@
 // App state: loaded from localStorage, merged with seed fixtures and result
 // drops on startup, persisted automatically on any change.
 
-import { reactive, watch } from "vue";
+import { reactive, watch, computed } from "vue";
 import { CLUBS } from "./data/data.js";
 import { SEED_FIXTURES, MOVED_FIXTURES } from "./data/fixtures.js";
 import { RESULTS } from "./data/results.js";
@@ -15,6 +15,7 @@ function defaultState() {
     positions: {},  // clubId -> current league position
     fixtures: [],   // filled from SEED_FIXTURES by mergeSeedFixtures()
     removed: [],    // "clubId|date" keys of fixtures removed in older versions
+    clubPrefs: {},  // clubId -> true/false, only for clubs explicitly toggled
   };
 }
 
@@ -27,6 +28,7 @@ function loadState() {
     if (!s.positions) s.positions = {};
     if (!s.fixtures) s.fixtures = [];
     if (!s.removed) s.removed = [];
+    if (!s.clubPrefs) s.clubPrefs = {};
     return s;
   } catch (e) {
     return defaultState();
@@ -135,6 +137,31 @@ function applyFixtureResult(f, gf, ga) {
 mergeSeedFixtures();
 mergeResults();
 
+/* ── Followed clubs ────────────────────────────────────── */
+
+// Only clubs the user has explicitly switched are recorded in clubPrefs; every
+// other club falls back to its catalog default. Storing the exceptions rather
+// than the full follow-list means a club added to the catalog later still shows
+// up for existing users (the way West Brom did) instead of being invisible
+// behind a saved list written before it existed.
+export function isFollowed(clubId) {
+  const pref = state.clubPrefs[clubId];
+  if (typeof pref === "boolean") return pref;
+  const club = clubById(clubId);
+  return !!club && club.followByDefault !== false;
+}
+
+export function toggleClub(clubId) {
+  state.clubPrefs[clubId] = !isFollowed(clubId);
+}
+
+export const activeClubs = computed(() => CLUBS.filter(c => isFollowed(c.id)));
+
+// Fixtures belonging to a followed club. A two-club matchup is stored once under
+// the home club, so it survives as long as either side is still followed.
+export const activeFixtures = computed(() => state.fixtures.filter(f =>
+  isFollowed(f.clubId) || (f.opponentId && isFollowed(f.opponentId))));
+
 /* ── Derived data ──────────────────────────────────────── */
 
 export function recordFor(clubId) {
@@ -217,6 +244,7 @@ export function importData(file) {
       state.positions = s.positions || {};
       state.fixtures = s.fixtures || [];
       state.removed = s.removed || [];
+      state.clubPrefs = s.clubPrefs || {};
     } catch (err) {
       alert("That file could not be read as a Season Ledger export.");
     }

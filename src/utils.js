@@ -1,6 +1,8 @@
 // Pure helpers shared across views — no app state in here.
 
 import { CLUBS, BROADCAST, RIVALS, BIG_OPPONENTS } from "./data/data.js";
+import { statureFor, COMP_WEIGHT, DERBY_LIFT,
+         BOTH_CLUBS_BONUS, MUST_WATCH_BONUS } from "./data/stature.js";
 
 export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -77,22 +79,38 @@ export function fixtureReasons(f) {
   return reasons;
 }
 
-export function fixtureScore(f) {
-  let s = 10;
+// A 0–100 rating for how worth watching a fixture is. Both clubs' stature is
+// multiplied rather than averaged, so a match is only as good as its weaker
+// side: two giants meeting scores in the nineties, a mid-table pairing in the
+// teens. Competition weight, derby lift and personal pull are layered on top.
+export function watchRating(f) {
+  const club = clubById(f.clubId);
+  const mine = statureFor(club ? club.short : f.clubId, f.comp);
+  const theirs = f.opponentId
+    ? statureFor(clubById(f.opponentId)?.short || f.opponent, f.comp)
+    : statureFor(f.opponent, f.comp);
+
+  let r = (mine * theirs) / 100;
+  r *= COMP_WEIGHT[f.comp] ?? 1;
+
   const reasons = fixtureReasons(f);
-  if (reasons.includes("Both your clubs")) s += 120;
-  if (reasons.includes("Derby")) s += 100;
-  if (reasons.includes("Big opponent")) s += 60;
-  if (reasons.includes("European night")) s += 40;
-  if (reasons.includes("Cup tie")) s += 20;
-  if (reasons.includes("Marked must-watch")) s += 80;
-  return s;
+  if (reasons.includes("Derby")) r += (100 - r) * DERBY_LIFT;
+  if (reasons.includes("Both your clubs")) r += BOTH_CLUBS_BONUS;
+  if (reasons.includes("Marked must-watch")) r += MUST_WATCH_BONUS;
+
+  return Math.max(1, Math.min(100, Math.round(r)));
 }
+
+// Kept as the calendar/dashboard sort key so ranking and the displayed rating
+// can never drift apart.
+export const fixtureScore = watchRating;
 
 // Detect whether a typed opponent is one of the tracked clubs.
 export function detectOpponentId(clubId, opponentName) {
   const n = opponentName.toLowerCase();
-  const hit = CLUBS.find(c => c.id !== clubId &&
+  // Unseeded catalog clubs are excluded: pairing a fixture to one would store it
+  // once as a two-club matchup that the catalog club has no fixture list to hold.
+  const hit = CLUBS.find(c => c.id !== clubId && c.seeded !== false &&
     (n.includes(c.short.toLowerCase()) || n.includes(c.name.toLowerCase())));
   return hit ? hit.id : undefined;
 }

@@ -1,22 +1,34 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import { displayHour, phaseName, scrub, driftToNow, startClock, stopClock } from "./atmosphere.js";
+import { startClock, stopClock } from "./atmosphere.js";
+import { LEAGUES, CLUBS } from "./data/data.js";
+import { isFollowed, toggleClub, activeClubs } from "./store.js";
 
-const showTime = ref(false);
+const showSettings = ref(false);
 
-const GLYPH = { dawn: "🌅", day: "☀️", golden: "🌇", night: "🌙" };
-const NAME = { dawn: "Dawn", day: "Midday", golden: "Golden hour", night: "Night" };
-const phaseGlyph = computed(() => GLYPH[phaseName.value] || "☀️");
-
-const clockLabel = computed(() => {
-  const h = displayHour.value;
-  const hh = Math.floor(h) % 24;
-  const m = Math.floor((h - Math.floor(h)) * 60);
-  const ap = hh < 12 ? "AM" : "PM";
-  const h12 = hh % 12 || 12;
-  return `${h12}:${String(m).padStart(2, "0")} ${ap} · ${NAME[phaseName.value]}`;
+// Catalog grouped by league, so the picker reads as leagues rather than a
+// flat list of eleven names.
+const groups = computed(() => {
+  const out = [];
+  for (const [key, league] of Object.entries(LEAGUES)) {
+    const clubs = CLUBS.filter(c => c.league === key);
+    if (clubs.length) out.push({ key, name: league.name, clubs });
+  }
+  return out;
 });
 
+const followedCount = computed(() => activeClubs.value.length);
+const leagueCount = computed(() => new Set(activeClubs.value.map(c => c.league)).size);
+
+const NUM = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven",
+             "Eight", "Nine", "Ten", "Eleven", "Twelve"];
+const spell = n => NUM[n] || String(n);
+
+const subtitle = computed(() =>
+  `2026–27 · ${spell(followedCount.value)} club${followedCount.value === 1 ? "" : "s"} · ` +
+  `${spell(leagueCount.value).toLowerCase()} league${leagueCount.value === 1 ? "" : "s"}`);
+
+// The atmosphere clock still drives the palette; only its scrub control is gone.
 onMounted(startClock);
 onUnmounted(stopClock);
 </script>
@@ -29,7 +41,7 @@ onUnmounted(stopClock);
         <span class="brand-mark" aria-hidden="true"></span>
         <span class="brand-copy">
           <h1 class="wordmark">The Season <span class="wm-accent">Ledger</span></h1>
-          <span class="season">2026–27 · Nine clubs · Six leagues</span>
+          <span class="season">{{ subtitle }}</span>
         </span>
       </router-link>
       <nav class="tools">
@@ -38,14 +50,21 @@ onUnmounted(stopClock);
           <router-link class="seg-item" to="/calendar">Calendar</router-link>
         </div>
         <div class="atmos">
-          <button class="btn atmos-btn" type="button" :aria-expanded="showTime"
-                  :title="clockLabel" @click="showTime = !showTime">{{ phaseGlyph }}</button>
-          <div v-if="showTime" class="atmos-pop">
-            <div class="atmos-clock">{{ clockLabel }}</div>
-            <input class="atmos-range" type="range" min="0" max="24" step="0.25"
-                   :value="displayHour" aria-label="Time of day"
-                   @input="scrub(+$event.target.value)" @change="driftToNow">
-            <div class="atmos-hint">Wander the day — it drifts back to now.</div>
+          <button class="btn atmos-btn" type="button" :aria-expanded="showSettings"
+                  title="Choose clubs" @click="showSettings = !showSettings">⚙</button>
+          <div v-if="showSettings" class="atmos-pop settings-pop">
+            <div class="atmos-clock">Clubs you follow</div>
+            <div v-for="g in groups" :key="g.key" class="set-group">
+              <div class="set-league">{{ g.name }}</div>
+              <label v-for="c in g.clubs" :key="c.id" class="set-row">
+                <input type="checkbox" :checked="isFollowed(c.id)" @change="toggleClub(c.id)">
+                <span class="kit" :class="`kit-${c.id}`"></span>
+                <span class="set-name">{{ c.short }}</span>
+                <span v-if="c.seeded === false" class="set-tag" title="No fixture list yet">no fixtures</span>
+              </label>
+            </div>
+            <div class="atmos-hint">Saved on this device. Unfollowing keeps a club's
+              logged matches — switch it back on and they return.</div>
           </div>
         </div>
       </nav>

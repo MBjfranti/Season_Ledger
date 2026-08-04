@@ -1,12 +1,12 @@
 <script setup>
 import { computed } from "vue";
-import { CLUBS, LEAGUES, CLUB_IMAGES, CLUB_COLORS } from "../data/data.js";
-import { state, recordFor } from "../store.js";
+import { LEAGUES, CLUB_IMAGES, CLUB_COLORS } from "../data/data.js";
+import { state, recordFor, activeClubs, activeFixtures } from "../store.js";
 import { fmtDate, timeSortKey, todayISO, addDaysISO,
          resultLetter, fixtureScore, fixtureReasons, matchupLabel } from "../utils.js";
 import BcChip from "../components/BcChip.vue";
 
-const upcoming = computed(() => state.fixtures
+const upcoming = computed(() => activeFixtures.value
   .filter(f => f.date && f.date >= todayISO())
   .sort((a, b) => a.date.localeCompare(b.date)));
 
@@ -14,11 +14,11 @@ function openerFor(clubId) {
   const f = upcoming.value.find(x => x.clubId === clubId || x.opponentId === clubId);
   if (!f) return null;
   const opp = f.clubId === clubId ? f.opponent
-    : CLUBS.find(c => c.id === f.clubId)?.short || f.opponent;
+    : activeClubs.value.find(c => c.id === f.clubId)?.short || f.opponent;
   return { date: f.date, opp };
 }
 
-const clubs = computed(() => CLUBS.map(c => ({
+const clubs = computed(() => activeClubs.value.map(c => ({
   ...c,
   leagueName: LEAGUES[c.league].name,
   images: CLUB_IMAGES[c.id],
@@ -59,7 +59,7 @@ const daysToKickoff = computed(() => {
 const weekAhead = computed(() => {
   const today = todayISO();
   const horizon = addDaysISO(today, 7);
-  return state.fixtures
+  return activeFixtures.value
     .filter(f => f.date && f.date >= today && f.date <= horizon)
     .sort((a, b) => a.date.localeCompare(b.date) || timeSortKey(a.time) - timeSortKey(b.time));
 });
@@ -68,7 +68,7 @@ const openers = computed(() => upcoming.value.slice(0, 6));
 
 const latestResults = computed(() => {
   const all = [];
-  for (const c of CLUBS) {
+  for (const c of activeClubs.value) {
     for (const m of (state.matches[c.id] || [])) all.push({ club: c, m });
   }
   all.sort((a, b) => b.m.date.localeCompare(a.m.date));
