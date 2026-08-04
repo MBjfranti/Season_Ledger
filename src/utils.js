@@ -10,6 +10,12 @@ export function uid() {
 
 export const clubById = id => CLUBS.find(c => c.id === id);
 
+// Every string that should identify a club inside an opponent name. Clubs whose
+// display short is a nickname ("Barça") carry aliases so the plain form still
+// matches — otherwise the matchup is stored once per side instead of shared.
+export const clubNameForms = c =>
+  [c.short, c.name, ...(c.aliases || [])].map(s => s.toLowerCase());
+
 export function fmtDate(iso) {
   if (!iso) return "TBD";
   const d = new Date(iso + "T12:00:00");
@@ -67,10 +73,20 @@ function matchesAny(name, list) {
   return (list || []).some(x => n.includes(x.toLowerCase()));
 }
 
+// store.js registers the real follow check here. A plain import would be a
+// cycle (store already imports this module), and defaulting to "followed" keeps
+// these helpers usable standalone in scripts and tests.
+let isFollowedCheck = () => true;
+export function setFollowedCheck(fn) { isFollowedCheck = fn; }
+
 export function fixtureReasons(f) {
   const club = clubById(f.clubId);
   const reasons = [];
-  if (f.opponentId) reasons.push("Both your clubs");
+  // Two catalog clubs meeting is not "both your clubs" unless you actually
+  // follow them — otherwise an unfollowed Clásico collects the personal bonus.
+  if (f.opponentId && isFollowedCheck(f.clubId) && isFollowedCheck(f.opponentId)) {
+    reasons.push("Both your clubs");
+  }
   if (f.derby || matchesAny(f.opponent, RIVALS[f.clubId])) reasons.push("Derby");
   if (matchesAny(f.opponent, BIG_OPPONENTS[club.league])) reasons.push("Big opponent");
   if (/UEFA/.test(f.comp)) reasons.push("European night");
@@ -111,7 +127,7 @@ export function detectOpponentId(clubId, opponentName) {
   // Unseeded catalog clubs are excluded: pairing a fixture to one would store it
   // once as a two-club matchup that the catalog club has no fixture list to hold.
   const hit = CLUBS.find(c => c.id !== clubId && c.seeded !== false &&
-    (n.includes(c.short.toLowerCase()) || n.includes(c.name.toLowerCase())));
+    clubNameForms(c).some(f => n.includes(f)));
   return hit ? hit.id : undefined;
 }
 

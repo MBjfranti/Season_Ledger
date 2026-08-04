@@ -495,8 +495,14 @@ textarea:focus-visible, summary:focus-visible {
 .kit-westbrom  { background: repeating-linear-gradient(90deg, #122f67 0 16px, #ffffff 16px 32px); }
 /* Catalog clubs: blaugrana stripes, Madrid's white with the gold trim, and the
    Hechter band down the middle of PSG's navy. */
-.kit-barcelona  { background: repeating-linear-gradient(90deg, #a50044 0 14px, #004d98 14px 28px); }
-.kit-realmadrid { background: linear-gradient(90deg, #ffffff 0 44%, #febe10 44% 56%, #ffffff 56%); }
+/* Barcelona keeps the family's pixel rhythm (Brighton and West Brom are 16px,
+   Dépor 18px), so the blaugrana bands sit at the same visual scale as their
+   neighbours instead of reading finer on a chip and coarser on a hero. */
+.kit-barcelona  { background: repeating-linear-gradient(90deg, #a50044 0 16px, #004d98 16px 32px); }
+/* Madrid play in white, which vanishes against the cream panels — so it follows
+   the Lorient/Rennes idiom of a solid field closed by an end block, in the
+   crest's gold and navy. That gives the chip an edge to read against. */
+.kit-realmadrid { background: linear-gradient(90deg, #ffffff 0 76%, #febe10 76% 84%, #ffffff 84% 88%, #00529f 88%); }
 .kit-psg        { background: linear-gradient(90deg, #004170 0 38%, #ffffff 38% 43%, #e30613 43% 57%, #ffffff 57% 62%, #004170 62%); }
 
 .card .body { padding: 18px 20px 20px; }
@@ -1367,12 +1373,15 @@ h3.mini-day-head { margin: 0 0 2px; }
   width: min(80%, 300px); height: auto; opacity: 0.07; filter: saturate(0.3);
 }
 
-/* The Nine — a wall of doors */
+/* The wall of doors. Column count comes from the club count (--cols, set by
+   DashboardView); rows are implicit and all share 1fr, so every card stays the
+   same size whatever the count. The old fixed 3x3 assumed exactly nine clubs —
+   a tenth spilled into an auto-height row and rendered a different size. */
 .nine-grid {
   height: 100%;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--cols, 3), 1fr);
+  grid-auto-rows: minmax(0, 1fr);
   gap: 12px;
   min-height: 0;
 }

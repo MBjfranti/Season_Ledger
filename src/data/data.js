@@ -106,17 +106,18 @@ export const CLUB_IMAGES = {
   deportivo: { hero: "img/hero-deportivo.jpg", crest: "img/crest-deportivo.png", heroPos: "center 12%", action: "img/deportivo-action.webp", actionPos: "center 22%" },
   milan:     { hero: "img/hero-milan.jpg",     crest: "img/crest-milan.png", heroPos: "center 60%", action: "img/milan-action.webp", actionPos: "center 28%" },
   bremen:    { hero: "img/hero-bremen.jpg",    crest: "img/crest-bremen.png", heroPos: "center 50%", action: "img/bremen-action.webp", actionPos: "center 22%" },
-  // Catalog clubs: action art only for now, so the banner falls back to a kit-colour wash.
-  barcelona:  { action: "img/barcelona-action.webp", actionPos: "center 25%" },
-  realmadrid: { action: "img/real-madrid-action.webp", actionPos: "center 25%" },
-  psg:        { action: "img/psg-action.webp", actionPos: "center 25%" },
+  barcelona:  { hero: "img/hero-barcelona.jpg",  crest: "img/crest-barcelona.png", heroPos: "center 45%", action: "img/barcelona-action.webp", actionPos: "center 25%" },
+  realmadrid: { hero: "img/hero-realmadrid.jpg", crest: "img/crest-realmadrid.png", heroPos: "center 50%", action: "img/real-madrid-action.webp", actionPos: "center 25%" },
+  psg:        { hero: "img/hero-psg.jpg",        crest: "img/crest-psg.png", heroPos: "center 45%", action: "img/psg-action.webp", actionPos: "center 25%" },
 };
 
 // Each club's dominant kit colour — feeds the glass tile glow on the dashboard.
 export const CLUB_COLORS = {
   brighton: "#0057b8", wrexham: "#d2242a", lincoln: "#d0021b", westbrom: "#1e3f86",
   rennes: "#e13327", lorient: "#ff7f27", deportivo: "#0d5eaf", milan: "#d40000", bremen: "#169152",
-  barcelona: "#a50044", realmadrid: "#febe10", psg: "#004170",
+  // Madrid play in white; the gold is trim only, and using it here turned the
+  // whole pitch olive. White mixes to a shaded neutral field instead.
+  barcelona: "#a50044", realmadrid: "#ffffff", psg: "#004170",
 };
 
 // Full fixture lists live in fixtures.js (SEED_FIXTURES); results drops in results.js.
@@ -133,6 +134,7 @@ export const CLUB_COLORS = {
 export const CLUBS = [
   {
     id: "brighton",
+    espnId: "331",
     name: "Brighton & Hove Albion",
     short: "Brighton",
     league: "premierLeague",
@@ -156,6 +158,7 @@ export const CLUBS = [
   },
   {
     id: "wrexham",
+    espnId: "352",
     name: "Wrexham",
     short: "Wrexham",
     league: "championship",
@@ -177,6 +180,7 @@ export const CLUBS = [
   },
   {
     id: "lincoln",
+    espnId: "314",
     name: "Lincoln City",
     short: "Lincoln",
     league: "championship",
@@ -199,6 +203,7 @@ export const CLUBS = [
   },
   {
     id: "westbrom",
+    espnId: "383",
     name: "West Bromwich Albion",
     short: "West Brom",
     league: "championship",
@@ -225,6 +230,7 @@ export const CLUBS = [
   },
   {
     id: "rennes",
+    espnId: "169",
     name: "Stade Rennais",
     short: "Rennes",
     league: "ligue1",
@@ -249,6 +255,7 @@ export const CLUBS = [
   },
   {
     id: "lorient",
+    espnId: "273",
     name: "FC Lorient",
     short: "Lorient",
     league: "ligue1",
@@ -272,6 +279,7 @@ export const CLUBS = [
   },
   {
     id: "deportivo",
+    espnId: "90",
     name: "Deportivo de La Coruña",
     short: "Dépor",
     league: "laLiga",
@@ -297,6 +305,7 @@ export const CLUBS = [
   },
   {
     id: "milan",
+    espnId: "103",
     name: "AC Milan",
     short: "Milan",
     league: "serieA",
@@ -321,6 +330,7 @@ export const CLUBS = [
   },
   {
     id: "bremen",
+    espnId: "137",
     name: "Werder Bremen",
     short: "Werder",
     league: "bundesliga",
@@ -346,14 +356,17 @@ export const CLUBS = [
   {
     id: "barcelona",
     name: "FC Barcelona",
-    short: "Barcelona",
+    short: "Barça",
+    // Opponent matching tests short and name as substrings; neither "Barça" nor
+    // "FC Barcelona" appears in the bare "Barcelona" that Dépor's list uses, so
+    // without this alias that matchup would be stored twice.
+    aliases: ["Barcelona"],
     league: "laLiga",
     leagueComp: "La Liga",
     comps: ["La Liga", "Copa del Rey", "UEFA Champions League"],
     manager: "Hansi Flick",
     espnId: "83",
     followByDefault: false,
-    seeded: false,
     keyFixtures: [],
     preview: [],
   },
@@ -367,7 +380,6 @@ export const CLUBS = [
     manager: "José Mourinho",
     espnId: "86",
     followByDefault: false,
-    seeded: false,
     keyFixtures: [],
     preview: [],
   },
@@ -381,7 +393,6 @@ export const CLUBS = [
     manager: "Luis Enrique",
     espnId: "160",
     followByDefault: false,
-    seeded: false,
     keyFixtures: [],
     preview: [],
   },

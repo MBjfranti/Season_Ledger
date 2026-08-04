@@ -5,7 +5,7 @@ import { reactive, watch, computed } from "vue";
 import { CLUBS } from "./data/data.js";
 import { SEED_FIXTURES, MOVED_FIXTURES } from "./data/fixtures.js";
 import { RESULTS } from "./data/results.js";
-import { uid, clubById, detectOpponentId } from "./utils.js";
+import { uid, clubById, detectOpponentId, setFollowedCheck } from "./utils.js";
 
 const LS_KEY = "uefa-2627-ledger-v1";
 
@@ -154,6 +154,9 @@ export function isFollowed(clubId) {
 export function toggleClub(clubId) {
   state.clubPrefs[clubId] = !isFollowed(clubId);
 }
+
+// Let the pure helpers score "both your clubs" against real follow state.
+setFollowedCheck(isFollowed);
 
 export const activeClubs = computed(() => CLUBS.filter(c => isFollowed(c.id)));
 

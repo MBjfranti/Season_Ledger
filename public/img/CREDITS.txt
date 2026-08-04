@@ -7,11 +7,20 @@ hero-wrexham.jpg    Racecourse Ground night match under floodlights — John Lor
 hero-lincoln.jpg    Lincoln City card tifo at Sincil Bank — Differentgravy, CC BY-SA 3.0
 hero-rennes.jpg     Roazhon Celtic Kop 25th-anniversary tifo, Rennes v Lorient 2017 — S. Plaine, CC BY-SA 4.0
 hero-lorient.jpg    Stade du Moustoir night panorama (Festival Interceltique) — XIIIfromTOKYO, CC BY 3.0
-hero-deportivo.jpg  Packed Riazor, Deportivo v Real Madrid — Mjazick, CC BY-SA 4.0
+hero-deportivo.jpg  Riazor under floodlights, Depor v Castellón — LuisMora4B, CC BY-SA 4.0
 hero-milan.jpg      Curva Sud tifo, Milan v Liverpool (UCL, Dec 2021) — Vasil Evlogiev, CC BY-SA 4.0
 hero-bremen.jpg     Weserstadion matchday, Werder v Stuttgart 2022 — Vincenzo.togni, CC BY-SA 4.0
 hero-westbrom.jpg   The Hawthorns panorama, matchday 2013 — dom fellowes, CC BY 2.0
 crest-westbrom.png  WBA crest via en.wikipedia (club trademark, personal use)
+hero-barcelona.jpg  Camp Nou interior (2005) — Mutari, public domain
+crest-barcelona.png FC Barcelona crest via en.wikipedia (club trademark, personal use)
+hero-realmadrid.jpg Bernabéu on a Champions League night, Real Madrid v Monaco — Badefa, CC0
+crest-realmadrid.png Real Madrid crest via en.wikipedia (club trademark, personal use)
+hero-psg.jpg        Parc des Princes from the players' tunnel — Like tears in rain, CC BY-SA 4.0
+crest-psg.png       PSG crest via en.wikipedia (club trademark, personal use).
+                    NB: the Commons "free version" of this logo is public domain
+                    only because the Eiffel Tower and cradle are stripped out of
+                    the middle — it renders as an empty ring. Use this one.
 
 Club action art (<club>-action.webp): original comic-book illustrations
 commissioned/generated for this project — a generic footballer in each club's

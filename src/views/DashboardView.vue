@@ -27,6 +27,11 @@ const clubs = computed(() => activeClubs.value.map(c => ({
   opener: openerFor(c.id),
 })));
 
+// Keep the tiles near-square as the slate grows: widen to more columns before
+// stacking more rows, since the wall has more width than height to give.
+// Nine clubs still lay out 3x3, as they always did.
+const gridCols = computed(() => Math.max(3, Math.ceil(Math.sqrt(clubs.value.length))));
+
 // The watch plan: the next DAY that has fixtures, ranked the way the calendar
 // ranks it — that day's top pick as Watch, up to two same-day Backups.
 const plan = computed(() => {
@@ -116,7 +121,7 @@ const tickerFixtures = computed(() => (weekAhead.value.length ? weekAhead.value 
     </section>
 
     <section class="nine-area">
-      <div class="nine-grid">
+      <div class="nine-grid" :style="{ '--cols': gridCols }">
         <router-link v-for="c in clubs" :key="c.id" class="door" :to="`/club/${c.id}`"
                      :style="{ '--club': CLUB_COLORS[c.id] }">
           <div class="kit" :class="`kit-${c.id}`"></div>
