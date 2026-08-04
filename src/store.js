@@ -6,6 +6,11 @@ import { CLUBS } from "./data/data.js";
 import { SEED_FIXTURES, MOVED_FIXTURES } from "./data/fixtures.js";
 import { RESULTS } from "./data/results.js";
 import { uid, clubById, detectOpponentId, setFollowedCheck } from "./utils.js";
+import { fetchSeason } from "./data/espn.js";
+
+// The 2026–27 window the API is queried over.
+const SEASON_FROM = "2026-07-01";
+const SEASON_TO = "2027-07-01";
 
 const LS_KEY = "uefa-2627-ledger-v1";
 
@@ -16,6 +21,7 @@ function defaultState() {
     fixtures: [],   // filled from SEED_FIXTURES by mergeSeedFixtures()
     removed: [],    // "clubId|date" keys of fixtures removed in older versions
     clubPrefs: {},  // clubId -> true/false, only for clubs explicitly toggled
+    apiSyncedAt: null, // ISO timestamp of the last successful ESPN sync
   };
 }
 
@@ -223,6 +229,127 @@ export const activeClubs = computed(() => CLUBS.filter(c => isFollowed(c.id)));
 // the home club, so it survives as long as either side is still followed.
 export const activeFixtures = computed(() => state.fixtures.filter(f =>
   isFollowed(f.clubId) || (f.opponentId && isFollowed(f.opponentId))));
+
+/* ── Live sync from the API ────────────────────────────── */
+
+const DAY = 86400e3;
+const pairKey = (a, b) => [a, b].filter(Boolean).sort().join("~");
+
+// Find the stored fixture an API record refers to. Matching by ESPN event id is
+// exact; the fallbacks exist so the FIRST sync adopts the hand-seeded fixtures
+// (which carry no event id) instead of duplicating every one of them — including
+// the case where a TV pick has since moved the date out from under them.
+function findStored(rec, claimed) {
+  if (rec.eid) {
+    const byId = state.fixtures.find(f => f.eid === rec.eid);
+    if (byId) return byId;
+  }
+  const candidates = state.fixtures.filter(f =>
+    !f.eid && !claimed.has(f.id) && f.comp === rec.comp &&
+    Math.abs(new Date(f.date) - new Date(rec.date)) <= 10 * DAY &&
+    (rec.opponentId
+      // A tracked-club matchup is stored once under whichever side is home, so
+      // compare the unordered pair rather than assuming who owns the entry.
+      ? pairKey(f.clubId, f.opponentId) === pairKey(rec.clubId, rec.opponentId)
+      : f.clubId === rec.clubId));
+  return candidates.sort((a, b) =>
+    Math.abs(new Date(a.date) - new Date(rec.date)) -
+    Math.abs(new Date(b.date) - new Date(rec.date)))[0];
+}
+
+function logResultDirect(rec) {
+  const club = clubById(rec.clubId);
+  if (!state.matches[rec.clubId]) state.matches[rec.clubId] = [];
+  state.matches[rec.clubId].push({
+    id: uid(), date: rec.date, comp: rec.comp, opponent: rec.opponent,
+    venue: rec.venue || "N", gf: rec.gf, ga: rec.ga, notes: "", watched: false,
+  });
+  if (rec.opponentId) {
+    const flip = rec.venue === "H" ? "A" : rec.venue === "A" ? "H" : rec.venue;
+    if (!state.matches[rec.opponentId]) state.matches[rec.opponentId] = [];
+    state.matches[rec.opponentId].push({
+      id: uid(), date: rec.date, comp: rec.comp, opponent: club ? club.name : rec.clubId,
+      venue: flip || "N", gf: rec.ga, ga: rec.gf, notes: "", watched: false,
+    });
+  }
+}
+
+// Fold API records into saved state. User annotations — watched, notes, stars —
+// are never touched: a record only ever rewrites the scheduling fields.
+export function applyApiRecords(records) {
+  const logged = new Set();
+  for (const [cid, ms] of Object.entries(state.matches)) {
+    for (const m of ms) logged.add(cid + "|" + m.date);
+  }
+  const claimed = new Set();
+  const stats = { added: 0, updated: 0, results: 0, skipped: 0 };
+
+  for (const rec of records) {
+    const existing = findStored(rec, claimed);
+    if (existing) claimed.add(existing.id);
+
+    if (rec.completed) {
+      if (logged.has(rec.clubId + "|" + rec.date)) { stats.skipped++; continue; }
+      if (existing) applyFixtureResult(existing, rec.gf, rec.ga);
+      else logResultDirect(rec);
+      logged.add(rec.clubId + "|" + rec.date);
+      if (rec.opponentId) logged.add(rec.opponentId + "|" + rec.date);
+      stats.results++;
+      continue;
+    }
+
+    if (existing) {
+      existing.eid = rec.eid;
+      existing.date = rec.date;
+      existing.comp = rec.comp;
+      existing.opponent = rec.opponent;
+      existing.venue = rec.venue;
+      existing.opponentId = rec.opponentId;
+      if (rec.time) existing.time = rec.time;
+      stats.updated++;
+    } else {
+      state.fixtures.push({
+        id: uid(), mustWatch: false, watched: false, notes: "", ...rec,
+      });
+      stats.added++;
+    }
+  }
+
+  state.apiSyncedAt = new Date().toISOString();
+  return stats;
+}
+
+export const syncState = reactive({ running: false, message: "", error: "" });
+
+export async function syncFromApi({ from, to } = {}) {
+  if (syncState.running) return null;
+  syncState.running = true;
+  syncState.error = "";
+  syncState.message = "Contacting ESPN…";
+  try {
+    const clubs = activeClubs.value.filter(c => c.espnId);
+    if (!clubs.length) throw new Error("No followed club has an ESPN id.");
+    const { records, errors, comps } = await fetchSeason(clubs, {
+      from: from || SEASON_FROM,
+      to: to || SEASON_TO,
+      onProgress: ({ done, total, comp }) => {
+        syncState.message = `${comp} (${done}/${total})`;
+      },
+    });
+    const stats = applyApiRecords(records);
+    syncState.message =
+      `${records.length} matches across ${comps} competitions · ` +
+      `${stats.added} new, ${stats.updated} updated, ${stats.results} results`;
+    if (errors.length) syncState.error = errors.join("; ");
+    return stats;
+  } catch (e) {
+    syncState.error = e.message || String(e);
+    syncState.message = "";
+    return null;
+  } finally {
+    syncState.running = false;
+  }
+}
 
 /* ── Derived data ──────────────────────────────────────── */
 

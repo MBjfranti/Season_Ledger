@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { startClock, stopClock } from "./atmosphere.js";
 import { LEAGUES, CLUBS } from "./data/data.js";
-import { isFollowed, toggleClub, activeClubs } from "./store.js";
+import { isFollowed, toggleClub, activeClubs, state, syncFromApi, syncState } from "./store.js";
 
 const showSettings = ref(false);
 
@@ -27,6 +27,17 @@ const spell = n => NUM[n] || String(n);
 const subtitle = computed(() =>
   `2026–27 · ${spell(followedCount.value)} club${followedCount.value === 1 ? "" : "s"} · ` +
   `${spell(leagueCount.value).toLowerCase()} league${leagueCount.value === 1 ? "" : "s"}`);
+
+const lastSync = computed(() => {
+  if (!state.apiSyncedAt) return "never";
+  const d = new Date(state.apiSyncedAt);
+  const mins = Math.round((Date.now() - d) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs} hr ago`;
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+});
 
 // The atmosphere clock still drives the palette; only its scrub control is gone.
 onMounted(startClock);
@@ -65,6 +76,19 @@ onUnmounted(stopClock);
             </div>
             <div class="atmos-hint">Saved on this device. Unfollowing keeps a club's
               logged matches — switch it back on and they return.</div>
+
+            <div class="sync-box">
+              <div class="set-league">Fixtures &amp; results</div>
+              <button class="btn sync-btn" type="button"
+                      :disabled="syncState.running" @click="syncFromApi()">
+                {{ syncState.running ? "Syncing…" : "Sync from ESPN" }}
+              </button>
+              <div class="sync-meta">Last sync: {{ lastSync }}</div>
+              <div v-if="syncState.message" class="sync-meta">{{ syncState.message }}</div>
+              <div v-if="syncState.error" class="sync-err">{{ syncState.error }}</div>
+              <div class="atmos-hint">Pulls the live schedule and any finished
+                scores. Your watched marks, stars and notes are kept.</div>
+            </div>
           </div>
         </div>
       </nav>

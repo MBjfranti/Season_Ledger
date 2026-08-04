@@ -1366,6 +1366,10 @@ h3.mini-day-head { margin: 0 0 2px; }
   margin-left: auto; font-size: 10px; color: var(--text-3);
   border: 1px solid var(--panel-edge); border-radius: 999px; padding: 1px 6px;
 }
+.sync-box { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--panel-edge); }
+.sync-btn { width: 100%; margin-top: 4px; }
+.sync-meta { margin-top: 6px; font-family: var(--data); font-size: 10.5px; color: var(--text-3); }
+.sync-err { margin-top: 6px; font-size: 11px; color: var(--bad, #b4443a); }
 
 /* ══ The Ledger board — a single screen, no scroll ════════ */
 .board {

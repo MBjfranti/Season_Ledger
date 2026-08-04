@@ -116,9 +116,7 @@ export const CLUB_IMAGES = {
   barcelona:  { hero: "img/hero-barcelona.jpg",  crest: "img/crest-barcelona.png", heroPos: "center 45%", action: "img/barcelona-action.webp", actionPos: "center 25%" },
   realmadrid: { hero: "img/hero-realmadrid.jpg", crest: "img/crest-realmadrid.png", heroPos: "center 50%", action: "img/real-madrid-action.webp", actionPos: "center 25%" },
   psg:        { hero: "img/hero-psg.jpg",        crest: "img/crest-psg.png", heroPos: "center 45%", action: "img/psg-action.webp", actionPos: "center 25%" },
-  // No action illustration yet — the image generator was out of credits. The
-  // next-fixture card falls back to the crest until one is added.
-  marseille:  { hero: "img/hero-marseille.jpg",  crest: "img/crest-marseille.png", heroPos: "center 55%" },
+  marseille:  { hero: "img/hero-marseille.jpg",  crest: "img/crest-marseille.png", heroPos: "center 55%", action: "img/marseille-action.webp", actionPos: "center 25%" },
 };
 
 // Each club's dominant kit colour — feeds the glass tile glow on the dashboard.
