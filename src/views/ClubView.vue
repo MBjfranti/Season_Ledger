@@ -1,8 +1,8 @@
 <script setup>
-import { computed, watch, onUnmounted } from "vue";
+import { computed, ref, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { LEAGUES, CLUB_IMAGES, CLUB_SITES, STADIUMS, CLUB_COLORS } from "../data/data.js";
 import { state, recordFor, setPosition } from "../store.js";
-import { fmtDate, todayISO, resultLetter, matchupLabel, getOrdinal, clubById } from "../utils.js";
+import { fmtDate, todayISO, timeSortKey, resultLetter, matchupLabel, getOrdinal, clubById } from "../utils.js";
 import BcChip from "../components/BcChip.vue";
 import ClubStrip from "../components/ClubStrip.vue";
 import FormChips from "../components/FormChips.vue";
@@ -40,14 +40,69 @@ const heroStyle = computed(() => ({
   backgroundPosition: images.value.heroPos || "center 35%",
 }));
 
-const matches = computed(() =>
-  [...(state.matches[props.id] || [])].sort((a, b) => b.date.localeCompare(a.date)));
+// Results and fixtures are one thing — the season — so they share one wall of
+// cards in date order: everything played, then everything still to come.
+const timeline = computed(() => {
+  const rows = [];
+  for (const m of (state.matches[props.id] || [])) {
+    rows.push({
+      key: "m" + m.id, kind: "result", date: m.date, time: "", comp: m.comp,
+      label: matchupLabel({ clubId: props.id, opponent: m.opponent, venue: m.venue }),
+      gf: m.gf, ga: m.ga, res: resultLetter(m.gf, m.ga),
+      notes: m.notes, watched: m.watched,
+    });
+  }
+  for (const f of state.fixtures) {
+    if (!f.date || (f.clubId !== props.id && f.opponentId !== props.id)) continue;
+    rows.push({
+      key: "f" + f.id, kind: "fixture", date: f.date, time: f.time, comp: f.comp,
+      label: matchupLabel(f), notes: f.notes,
+    });
+  }
+  return rows.sort((a, b) =>
+    a.date.localeCompare(b.date) || timeSortKey(a.time) - timeSortKey(b.time));
+});
 
-const upcoming = computed(() => state.fixtures
-  .filter(f => f.clubId === props.id || f.opponentId === props.id)
-  .filter(f => f.date && f.date >= todayISO())
-  .sort((a, b) => a.date.localeCompare(b.date))
-  .slice(0, 8));
+const played = computed(() => timeline.value.filter(r => r.kind === "result").length);
+
+// The card the wall opens on: the first fixture still to come.
+const nextIdx = computed(() => {
+  const t = todayISO();
+  return timeline.value.findIndex(r => r.kind === "fixture" && r.date >= t);
+});
+
+const nextFixture = computed(() => state.fixtures
+  .filter(f => (f.clubId === props.id || f.opponentId === props.id) && f.date && f.date >= todayISO())
+  .sort((a, b) => a.date.localeCompare(b.date) || timeSortKey(a.time) - timeSortKey(b.time))[0]);
+
+// Venue from *this* club's side of the tie — a stored fixture is written from
+// f.clubId's perspective, so it flips when we're the opponent.
+const nextVenue = computed(() => {
+  const f = nextFixture.value;
+  if (!f || !f.venue) return "";
+  const v = f.clubId === props.id ? f.venue : f.venue === "H" ? "A" : f.venue === "A" ? "H" : f.venue;
+  return { H: "Home", A: "Away", N: "Neutral" }[v] || "";
+});
+
+const nextCountdown = computed(() => {
+  const f = nextFixture.value;
+  if (!f) return "";
+  const days = Math.round(
+    (new Date(f.date + "T12:00:00") - new Date(todayISO() + "T12:00:00")) / 86400e3);
+  return days <= 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`;
+});
+
+// Park the wall on the row holding the next fixture — the season so far stays
+// one scroll up, the run of games to come reads down from here.
+const wall = ref(null);
+function scrollToNext() {
+  const el = wall.value;
+  if (!el) return;
+  const card = el.querySelector(".tl-card.is-next");
+  el.scrollTop = card ? Math.max(0, card.offsetTop - 6) : el.scrollHeight;
+}
+onMounted(() => nextTick(scrollToNext));
+watch(() => props.id, () => nextTick(scrollToNext));
 
 // Forecast band: one segment per league place, highlighting the forecast range.
 const bandSegs = computed(() => {
@@ -89,9 +144,6 @@ const bandSegs = computed(() => {
         </div>
         </div>
       </div>
-      <div v-if="images && images.action" class="hero-poster"
-           :style="{ backgroundImage: `url('${images.action}')`, backgroundPosition: images.actionPos || 'center 18%' }"
-           role="img" :aria-label="`${club.name} illustration`"></div>
     </div>
 
     <div class="two-col">
@@ -108,25 +160,43 @@ const bandSegs = computed(() => {
           <div class="prose"><p v-for="(p, i) in club.preview" :key="i">{{ p }}</p></div>
         </details>
 
-        <h2 class="section-label">Results</h2>
-        <div v-if="matches.length" class="log-scroll">
-          <table class="log-table">
-            <thead><tr><th>Date</th><th>Comp</th><th>Opponent</th><th>Result</th><th>Notes</th></tr></thead>
-            <tbody>
-              <tr v-for="m in matches" :key="m.id">
-                <td>{{ fmtDate(m.date) }}</td>
-                <td>{{ m.comp }}</td>
-                <td>{{ m.opponent }} ({{ m.venue }})</td>
-                <td class="score" :class="`res-${resultLetter(m.gf, m.ga)}`">{{ resultLetter(m.gf, m.ga) }} {{ m.gf }}–{{ m.ga }}</td>
-                <td class="notes"><span v-if="m.watched" class="watched-mark">watched</span> {{ m.notes || "" }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div v-else class="empty">No results yet — they arrive with the periodic result pulls once the season starts.</div>
+        <h2 class="section-label">The season</h2>
+        <template v-if="timeline.length">
+          <div class="wall-bar">
+            <span>{{ played }} played · {{ timeline.length - played }} to come</span>
+            <button class="btn" type="button" @click="scrollToNext">Next fixture ↓</button>
+          </div>
+          <div ref="wall" class="tl-wall">
+            <article v-for="(r, i) in timeline" :key="r.key" class="tl-card"
+                     :class="[r.kind === 'result' ? `is-result res-${r.res}` : 'is-fixture',
+                              { 'is-next': i === nextIdx }]">
+              <span v-if="i === nextIdx" class="tl-flag">Next</span>
+              <div class="tl-when">{{ fmtDate(r.date) }}<template v-if="r.time"> · {{ r.time }}</template></div>
+              <div class="tl-match">{{ r.label }}</div>
+              <div v-if="r.kind === 'result'" class="tl-score" :class="`res-${r.res}`">{{ r.res }} {{ r.gf }}–{{ r.ga }}</div>
+              <div class="tl-comp">{{ r.comp }}</div>
+              <div v-if="r.notes || r.watched" class="tl-note">
+                <span v-if="r.watched" class="watched-mark">watched</span> {{ r.notes }}
+              </div>
+              <div v-if="r.kind === 'fixture'" class="tl-bc"><BcChip :comp="r.comp" /></div>
+            </article>
+          </div>
+        </template>
+        <div v-else class="empty">Nothing on the ledger yet — fixtures arrive with the <router-link to="/calendar">calendar</router-link>, results with the periodic pulls.</div>
       </div>
 
       <div>
+        <div v-if="nextFixture" class="next-card" :class="{ 'has-art': images && images.action }">
+          <div v-if="images && images.action" class="nc-art"
+               :style="{ backgroundImage: `url('${images.action}')` }"
+               role="img" :aria-label="`${club.name} illustration`"></div>
+          <div class="nc-eyebrow">Next fixture <span class="nc-count">{{ nextCountdown }}</span></div>
+          <div class="nc-match">{{ matchupLabel(nextFixture) }}</div>
+          <div class="nc-when">{{ fmtDate(nextFixture.date) }}<template v-if="nextFixture.time"> · {{ nextFixture.time }}</template></div>
+          <div class="nc-meta">{{ nextFixture.comp }}<template v-if="nextVenue"> · {{ nextVenue }}</template></div>
+          <div class="nc-bc"><BcChip :comp="nextFixture.comp" /></div>
+        </div>
+
         <div class="band-wrap">
           <h2 class="section-label" style="margin:0 0 4px">Forecast: {{ club.forecast.low }}{{ getOrdinal(club.forecast.low) }}–{{ club.forecast.high }}{{ getOrdinal(club.forecast.high) }}</h2>
           <div class="band-row">
@@ -143,15 +213,6 @@ const bandSegs = computed(() => {
           </div>
           <div class="band-note">{{ club.forecast.extra }}</div>
         </div>
-
-        <h2 class="section-label">Next up</h2>
-        <ul v-if="upcoming.length" class="fixtures">
-          <li v-for="f in upcoming" :key="f.id">
-            <span class="when">{{ fmtDate(f.date) }}<template v-if="f.time"> · {{ f.time }}</template></span>
-            <span class="fx-line">{{ matchupLabel(f) }} · {{ f.comp }} <BcChip :comp="f.comp" /></span>
-          </li>
-        </ul>
-        <div v-else class="empty">No upcoming fixtures on the <router-link to="/calendar">calendar</router-link>.</div>
 
         <h2 class="section-label">Key dates</h2>
         <ul class="fixtures">

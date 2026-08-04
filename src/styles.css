@@ -567,15 +567,7 @@ textarea:focus-visible, summary:focus-visible {
 .club-hero { margin-bottom: 10px; display: flex; gap: 12px; align-items: stretch; }
 .hero-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
 .hero-main .hero-body { flex: 1; }
-/* The club's illustration as a tall poster beside the stadium hero */
-.hero-poster {
-  flex: none; width: 216px; align-self: stretch;
-  border-radius: var(--r-card); border: 1px solid var(--panel-edge);
-  box-shadow: var(--shadow-md); overflow: hidden;
-  background-color: color-mix(in srgb, var(--club, #1a1a12) 30%, #12120c);
-  background-size: cover; background-repeat: no-repeat;
-}
-@media (max-width: 760px) { .hero-poster { display: none; } }
+/* (The club illustration now lives inside the next-fixture card.) */
 .club-hero .kit { height: 14px; border-radius: var(--r-card) var(--r-card) 0 0; }
 .club-hero .hero-body {
   background: var(--panel);
@@ -1097,6 +1089,118 @@ h3.mini-day-head { margin: 0 0 2px; }
 .field-check { flex-direction: row; align-items: center; gap: 8px; }
 .field-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
 
+/* ══ Club page: the season wall ═══════════════════════════
+   Results and fixtures in one chronological grid, three to a row, scrolled to
+   the row holding the next fixture: the season so far sits one scroll up, the
+   run of games to come reads down from the highlighted card. */
+.wall-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap; margin-bottom: 10px;
+  font-family: var(--data); font-size: 11.5px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-pitch-2);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.3);
+}
+.wall-bar .btn { padding: 4px 11px; font-size: 12px; letter-spacing: 0.04em; }
+.tl-wall {
+  position: relative;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;
+  max-height: clamp(320px, 54vh, 640px);
+  overflow-y: auto;
+  padding: 3px 10px 3px 3px;
+}
+.tl-wall::-webkit-scrollbar { width: 10px; }
+.tl-wall::-webkit-scrollbar-thumb {
+  background: var(--panel-edge); border-radius: 999px;
+  border: 3px solid transparent; background-clip: padding-box;
+}
+.tl-card {
+  position: relative;
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 11px 12px 12px;
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-left-width: 3px;
+  border-radius: var(--r-tile);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.14s ease, transform 0.14s ease;
+}
+.tl-card:hover { transform: translateY(-2px); box-shadow: var(--glow); }
+/* Played: the left edge carries the result. To come: the accent, faded. */
+.tl-card.res-W { border-left-color: var(--win); }
+.tl-card.res-D { border-left-color: var(--draw); }
+.tl-card.res-L { border-left-color: var(--loss); }
+.tl-card.is-result { opacity: 0.9; }
+.tl-card.is-fixture {
+  border-left-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--bg-raised);
+}
+.tl-card.is-next {
+  border-color: var(--accent); border-left-color: var(--accent);
+  box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--accent);
+}
+.tl-flag {
+  position: absolute; top: -1px; right: -1px;
+  font-family: var(--data); font-size: 9.5px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--on-accent); background: var(--accent);
+  padding: 2px 8px; border-radius: 0 calc(var(--r-tile) - 1px) 0 var(--r-tile);
+}
+.tl-when { font-family: var(--data); font-size: 11px; color: var(--text-3); letter-spacing: 0.02em; }
+.tl-card.is-next .tl-when { padding-right: 42px; }  /* clear the flag */
+.tl-match {
+  font-family: var(--display); font-stretch: 80%; font-weight: 600;
+  font-size: 16.5px; line-height: 1.05;
+  text-transform: uppercase; letter-spacing: 0.01em; overflow-wrap: anywhere;
+}
+.tl-score { font-family: var(--data); font-weight: 600; font-size: 15px; }
+.tl-score.res-W { color: var(--win); }
+.tl-score.res-D { color: var(--draw); }
+.tl-score.res-L { color: var(--loss); }
+.tl-comp { font-size: 11.5px; color: var(--text-3); }
+.tl-note { font-family: var(--prose); font-style: italic; font-size: 12.5px; color: var(--text-2); }
+.tl-bc { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; padding-top: 3px; }
+.tl-bc .bc + .bc { margin-left: 0; }
+@media (max-width: 1040px) { .tl-wall { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .tl-wall { grid-template-columns: 1fr; } }
+
+/* The next fixture, called out above the forecast band. The club's comic
+   illustration rides along the right edge, masked so it dissolves into the
+   panel on its left and only the outer third holds full opacity — the copy
+   then sits on plain card, never on the busy part of the art. */
+.next-card {
+  position: relative; overflow: hidden; isolation: isolate;
+  padding: 15px 17px 16px; margin-bottom: 18px;
+  border: 1px solid var(--win-line); border-radius: var(--r-card);
+  background: linear-gradient(180deg, var(--win-soft), transparent), var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+.next-card.has-art { padding-right: 40%; min-height: 208px; }
+.nc-art {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 56%; z-index: 0;
+  /* the panels are tall crops, so anchor near the top: heads stay in frame */
+  background-size: cover; background-position: center 14%; background-repeat: no-repeat;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.28) 34%, rgba(0,0,0,0.8) 64%, #000 82%);
+          mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.28) 34%, rgba(0,0,0,0.8) 64%, #000 82%);
+}
+.next-card > *:not(.nc-art) { position: relative; z-index: 1; }
+.nc-eyebrow {
+  display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  font-family: var(--data); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-3);
+}
+.nc-count { font-weight: 600; letter-spacing: 0.1em; color: var(--accent); }
+@media (max-width: 860px) { .next-card.has-art { padding-right: 34%; } }
+.nc-match {
+  font-family: var(--display); font-stretch: 114%; font-weight: 700;
+  font-size: clamp(20px, 2.1vw, 27px); line-height: 1.02;
+  text-transform: uppercase; letter-spacing: 0.01em; margin-top: 9px;
+}
+.nc-when { font-family: var(--data); font-size: 13px; color: var(--text-2); margin-top: 9px; }
+.nc-meta { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+.nc-bc { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.nc-bc .bc + .bc { margin-left: 0; }
+
 /* ══ Time-of-day control ══════════════════════════════════ */
 .atmos { position: relative; }
 .atmos-btn { font-size: 16px; width: 40px; padding-left: 0; padding-right: 0;
@@ -1495,7 +1599,7 @@ body::after {
    this only layers the grain image on top (fixed attachment → one continuous
    wall, not a tile per card). Out/empty calendar cells keep their transparent
    background via higher specificity, so no grain shows on blank days. */
-.card, .fx-card, .cal-cell, .drawer,
+.card, .fx-card, .cal-cell, .drawer, .tl-card,
 .aggregate, .band-wrap, .explain, .ticker-area,
 .club-hero .hero-body:not(.has-photo) {
   background-image: var(--plaster);
