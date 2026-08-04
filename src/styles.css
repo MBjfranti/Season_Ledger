@@ -504,6 +504,8 @@ textarea:focus-visible, summary:focus-visible {
    crest's gold and navy. That gives the chip an edge to read against. */
 .kit-realmadrid { background: linear-gradient(90deg, #ffffff 0 76%, #febe10 76% 84%, #ffffff 84% 88%, #00529f 88%); }
 .kit-psg        { background: linear-gradient(90deg, #004170 0 38%, #ffffff 38% 43%, #e30613 43% 57%, #ffffff 57% 62%, #004170 62%); }
+/* OM: white shirt closed by the azure trim, in the Lorient/Rennes end-block idiom. */
+.kit-marseille  { background: linear-gradient(90deg, #ffffff 0 78%, #2faee0 78% 92%, #0e6f96 92%); }
 
 .card .body { padding: 18px 20px 20px; }
 .card h3 {
@@ -590,7 +592,13 @@ textarea:focus-visible, summary:focus-visible {
   border-radius: 0 0 var(--r-card) var(--r-card);
   padding: 22px 24px;
   box-shadow: var(--shadow-sm);
-  display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-end; justify-content: space-between;
+  /* Two columns rather than a wrapping flex row. A long club name (Brighton &
+     Hove Albion, West Bromwich Albion, Paris Saint-Germain) used to fill the
+     flex line and bump the record onto a second line, which floated it upward
+     instead of leaving it in the bottom-right corner. As a grid, the name wraps
+     inside its own column and the record keeps its cell whatever the length. */
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px; align-items: end;
 }
 .club-hero .hero-body.has-photo {
   min-height: 248px;
@@ -635,7 +643,13 @@ textarea:focus-visible, summary:focus-visible {
   backdrop-filter: blur(2px);
 }
 .site-link:hover { border-color: #fff; background: rgba(0,0,0,0.42); }
-.club-hero .bigrecord { text-align: right; }
+.club-hero .hero-title { min-width: 0; }
+.club-hero .bigrecord { text-align: right; justify-self: end; }
+/* Narrow screens: stack, but keep the record hard right so it never reads as
+   belonging to the left column. */
+@media (max-width: 640px) {
+  .club-hero .hero-body { grid-template-columns: minmax(0, 1fr); }
+}
 .club-hero .bigrecord .r { font-family: var(--display); font-stretch: 114%; font-weight: 700; font-size: 44px; line-height: 1; }
 .club-hero .bigrecord .l {
   font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
@@ -1475,6 +1489,7 @@ h3.mini-day-head { margin: 0 0 2px; }
 }
 .door {
   position: relative; isolation: isolate;
+  container-type: inline-size; /* so .door h3 can size against the card width */
   display: flex; flex-direction: column;
   border: 1px solid transparent;
   border-radius: var(--r-tile);
@@ -1511,8 +1526,14 @@ h3.mini-day-head { margin: 0 0 2px; }
 .door-body { position: relative; padding: 11px 13px 12px; display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0; }
 .door h3 {
   font-family: var(--display); font-stretch: 114%; font-weight: 600;
-  font-size: clamp(17px, 1.5vw, 21px); line-height: 1;
+  line-height: 1;
   text-transform: uppercase; letter-spacing: 0.01em; color: var(--text);
+  /* Sized against the CARD, not the viewport. A viewport-based clamp grew the
+     text on wide screens exactly when more columns were making cards narrower,
+     so a long single word (MARSEILLE) overflowed. Container units track the
+     card, so the name shrinks to fit instead of breaking mid-word. */
+  font-size: clamp(12px, 10.5cqw, 20px);
+  overflow-wrap: break-word; /* last resort only; the sizing above should fit */
 }
 .door-league { font-size: 11px; color: var(--text-3); }
 .door-next { margin-top: auto; font-family: var(--data); font-size: 11.5px; color: var(--text-2); }

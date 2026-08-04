@@ -53,6 +53,7 @@ export const RIVALS = {
   barcelona: ["Real Madrid", "Espanyol"],
   realmadrid: ["Barcelona", "Atlético", "Atletico"],
   psg:       ["Marseille", "Lyon"],
+  marseille: ["Paris Saint-Germain", "PSG", "Lyon", "Olympique Lyonnais"],
 };
 
 // Marquee opponents per league — a match against these is worth watching.
@@ -81,6 +82,7 @@ export const CLUB_SITES = {
   barcelona: "https://www.fcbarcelona.com",
   realmadrid: "https://www.realmadrid.com",
   psg:       "https://www.psg.fr",
+  marseille: "https://www.om.fr",
 };
 
 // Stadium name + capacity shown on club banners (verified July 2026).
@@ -97,6 +99,7 @@ export const STADIUMS = {
   barcelona: { name: "Spotify Camp Nou", capacity: 62652, note: "phased reopening; ~105,000 when the rebuild completes in 2027" },
   realmadrid: { name: "Santiago Bernabéu", capacity: 78297 },
   psg:       { name: "Parc des Princes", capacity: 47929 },
+  marseille: { name: "Orange Vélodrome", capacity: 67394, note: "the largest club ground in France" },
 };
 
 // heroPos: optional CSS background-position to control the hero crop (default "center 35%").
@@ -113,6 +116,9 @@ export const CLUB_IMAGES = {
   barcelona:  { hero: "img/hero-barcelona.jpg",  crest: "img/crest-barcelona.png", heroPos: "center 45%", action: "img/barcelona-action.webp", actionPos: "center 25%" },
   realmadrid: { hero: "img/hero-realmadrid.jpg", crest: "img/crest-realmadrid.png", heroPos: "center 50%", action: "img/real-madrid-action.webp", actionPos: "center 25%" },
   psg:        { hero: "img/hero-psg.jpg",        crest: "img/crest-psg.png", heroPos: "center 45%", action: "img/psg-action.webp", actionPos: "center 25%" },
+  // No action illustration yet — the image generator was out of credits. The
+  // next-fixture card falls back to the crest until one is added.
+  marseille:  { hero: "img/hero-marseille.jpg",  crest: "img/crest-marseille.png", heroPos: "center 55%" },
 };
 
 // Each club's dominant kit colour — feeds the glass tile glow on the dashboard.
@@ -122,6 +128,8 @@ export const CLUB_COLORS = {
   // Madrid play in white; the gold is trim only, and using it here turned the
   // whole pitch olive. White mixes to a shaded neutral field instead.
   barcelona: "#a50044", realmadrid: "#ffffff", psg: "#004170",
+  // OM play in white; the azure is the trim, and it tints the pitch far better.
+  marseille: "#2faee0",
 };
 
 // Full fixture lists live in fixtures.js (SEED_FIXTURES); results drops in results.js.
@@ -442,6 +450,31 @@ export const CLUBS = [
       "So the season is really about Europe, and specifically about whether the new league phase helps or hurts them. Eight matches against seeded opposition is a better test than the old group stage, and PSG's method — high risk, high control — is far better suited to knockout football than the previous incarnation's reliance on individual moments.",
       "The Parc des Princes remains a complication in the background. The club's long-running attempt to buy or replace a stadium it does not own is unresolved, and at under 48,000 it is comfortably the smallest home ground of any European superclub.",
       "The forecast here: first or second in Ligue 1, which is close to a given. The real measure is whether a properly coached PSG can convert its structural advantage into the European result the previous model never managed.",
+    ],
+  },
+  {
+    id: "marseille",
+    name: "Olympique de Marseille",
+    short: "Marseille",
+    league: "ligue1",
+    leagueComp: "Ligue 1",
+    comps: ["Ligue 1", "Coupe de France", "UEFA Europa League"],
+    manager: "Bruno Genesio",
+    espnId: "176",
+    forecast: { low: 2, high: 5, extra: "Second is the ceiling while PSG exist; the Europa League is the winnable prize." },
+    previewBy: "app",
+    keyFixtures: [
+      { label: "PSG (H) — Le Classique", when: "Sep 20, 2026", date: "2026-09-20" },
+      { label: "Rennes (A)", when: "Sep 11, 2026", date: "2026-09-11" },
+      { label: "PSG (A) — Le Classique, return", when: "Feb 7, 2027", date: "2027-02-07" },
+    ],
+    preview: [
+      "Marseille begin 2026–27 under their fourth head coach in barely two years, which tells you most of what you need to know about how the club operates. Bruno Genesio arrived on July 1 after Habib Beye lasted four months, and he inherits a squad that finished fifth — enough for the Europa League, not enough for anyone in Provence to call the season acceptable.",
+      "Genesio is an interesting corrective. He is not a personality hire in the way De Zerbi or Beye were; he is a pragmatist with a long record of overachieving quietly, most recently taking Lille back into the Champions League on a fraction of Marseille's budget. He has also managed Lyon and Rennes, which means he arrives knowing exactly how hostile this particular job can be. His contract runs to 2028, though contracts have not historically meant a great deal here.",
+      "The Vélodrome is the reason the club matters. Sixty-seven thousand seats, the largest club ground in France, and an atmosphere that swings between the best in Europe and openly mutinous — sometimes within the same evening. No stadium in the league does more to decide matches, and none turns on its own team faster. For a neutral it is the single most compelling reason to watch Ligue 1 outside of Paris.",
+      "The competitive reality is narrow. PSG's resources put the title out of reach in any normal season, so Marseille's ambition is second place, a Champions League return, and a genuine run at the Europa League — a trophy this squad is good enough to win and which would justify an otherwise ordinary league campaign. Le Classique bookends the season either side of the winter, at home on September 20 and in Paris on February 7.",
+      "The risk is the same one that has undone every recent Marseille project: a poor September, a restless Vélodrome, and an ownership that reaches for a new coach before the current one has finished a preseason. Genesio's calm is the asset here, provided he is allowed to use it.",
+      "The forecast here: second to fifth in Ligue 1, with the Europa League as the realistic prize. Marseille are rarely the best team in France and reliably the most watchable.",
     ],
   },
 ];
