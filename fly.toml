@@ -1,0 +1,27 @@
+# Season Ledger — static Vite build served by nginx.
+# Deploy:  fly deploy
+#
+# State lives in the browser's localStorage, so there is nothing to persist
+# server-side and the machine is safe to stop when idle.
+
+app = "season-ledger"
+primary_region = "ord"
+
+[build]
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

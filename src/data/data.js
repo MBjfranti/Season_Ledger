@@ -116,8 +116,10 @@ export const CLUBS = [
     manager: "Fabian Hürzeler",
     forecast: { low: 8, high: 11, extra: "At least a Conference League quarterfinal." },
     keyFixtures: [
-      { label: "Aston Villa (H) — opening home match", when: "Opening weekend, Aug 2026" },
-      { label: "Conference League league phase begins", when: "Autumn 2026" },
+      { label: "Conference League play-off, 1st leg (A)", when: "Aug 20, 2026", date: "2026-08-20" },
+      { label: "Aston Villa (H) — opening home match", when: "Aug 23, 2026", date: "2026-08-23" },
+      { label: "Conference League play-off, 2nd leg (H)", when: "Aug 27, 2026", date: "2026-08-27" },
+      { label: "Conference League league phase draw", when: "Aug 28, 2026" },
     ],
     preview: [
       "Brighton enter 2026–27 having crossed another important threshold. An eighth-place finish and 53 points secured Conference League football, transforming them from an admired domestic outsider into a club expected to compete on several fronts. Fabian Hürzeler's team finished last season strongly, while Danny Welbeck scored 13 league goals—matching Brighton's Premier League-era single-season record. The challenge now is sustaining that progress while playing Thursday-night European matches.",
@@ -280,7 +282,8 @@ export const CLUBS = [
     keyFixtures: [
       { label: "Torino (A) — opening match", when: "Opening weekend, Aug 2026" },
       { label: "Venezia (H) — first home match", when: "Aug 2026" },
-      { label: "Inter (Derby della Madonnina)", when: "TBD" },
+      { label: "Inter (Derby della Madonnina, H)", when: "Oct 31, 2026", date: "2026-10-31" },
+      { label: "Inter (Derby della Madonnina, A)", when: "Feb 13, 2027", date: "2027-02-13" },
     ],
     preview: [
       "Milan begin 2026–27 under considerable pressure. Last season's fifth-place finish produced 70 points but left the Rossoneri outside the Champions League positions, seventeen points behind champions Inter. For a club of Milan's resources and historical expectations, returning to the top four is the minimum requirement. The appointment of Rúben Amorim indicates that the administration wants a recognizable new footballing identity rather than another incremental adjustment.",
@@ -303,8 +306,8 @@ export const CLUBS = [
     keyFixtures: [
       { label: "Freiburg (A) — opening match", when: "Opening weekend, Aug 2026" },
       { label: "RB Leipzig (H) — first home match", when: "Aug 2026" },
-      { label: "Hamburg (Nordderby)", when: "Nov 2026" },
-      { label: "Hamburg (Nordderby, return)", when: "Mar 2027" },
+      { label: "Hamburg (Nordderby, H)", when: "Nov 21, 2026", date: "2026-11-21" },
+      { label: "Hamburg (Nordderby, A)", when: "Mar 20, 2027", date: "2027-03-20" },
     ],
     preview: [
       "Werder Bremen enter 2026–27 as a club in transition rather than crisis. Daniel Thioune leads a young, technically interesting squad that should have enough quality to remain comfortably in the Bundesliga but still contains obvious vulnerabilities. For you, Werder completes the geographical pattern of the slate: a green-and-white club from a Hanseatic port city, connected to the North Sea through the Weser and defined by a strong regional identity.",

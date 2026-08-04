@@ -145,8 +145,8 @@ const LEAGUE_FIXTURES = {
   rennes: { comp: "Ligue 1", games: [
     ["2026-08-23","Paris Saint-Germain","A","1:45 PM"],
     ["2026-08-30","Le Mans FC","H","10:15 AM"],
-    ["2026-09-05","Angers SCO","A"],
-    ["2026-09-12","Olympique de Marseille","H"],
+    ["2026-09-06","Angers SCO","A","10:15 AM"],
+    ["2026-09-11","Olympique de Marseille","H","1:45 PM"],
     ["2026-09-19","Olympique Lyonnais","A"],
     ["2026-10-10","AJ Auxerre","H"],
     ["2026-10-17","Paris FC","A"],
@@ -181,8 +181,8 @@ const LEAGUE_FIXTURES = {
   lorient: { comp: "Ligue 1", games: [
     ["2026-08-22","Nice","A","1:45 PM"],
     ["2026-08-29","Troyes","H","1:45 PM"],
-    ["2026-09-05","Lens","A"],
-    ["2026-09-12","Toulouse","H"],
+    ["2026-09-05","Lens","A","10:15 AM"],
+    ["2026-09-12","Toulouse","H","1:45 PM"],
     ["2026-09-19","Le Mans","A"],
     ["2026-10-10","Paris FC","H"],
     ["2026-10-17","Monaco","H"],
@@ -258,7 +258,7 @@ const LEAGUE_FIXTURES = {
     ["2026-08-23","Torino","A","1:45 PM"],
     ["2026-08-28","Venezia","H","1:45 PM"],
     ["2026-09-06","Juventus","A","1:45 PM"],
-    ["2026-09-12","Lazio","A"],
+    ["2026-09-13","Lazio","A","1:45 PM"],
     ["2026-09-20","Lecce","H","1:45 PM"],
     ["2026-10-10","Sassuolo","A"],
     ["2026-10-17","Atalanta","H"],
@@ -388,6 +388,12 @@ const CUP_FIXTURES = [
   { clubId: "wrexham", opponent: "Middlesbrough", venue: "A", comp: "EFL Cup", date: "2026-08-07", time: "2:00 PM CT" },
   { clubId: "lincoln", opponent: "Derby County", venue: "A", comp: "EFL Cup", date: "2026-08-08", time: "9:00 AM CT" },
   { clubId: "westbrom", opponent: "Rotherham United", venue: "A", comp: "EFL Cup", date: "2026-08-08", time: "11:30 AM CT" },
+  // Conference League play-off round (draw made 2026-08-03). Brighton are seeded and
+  // away first. Opponent is decided by the CFR Cluj v Tromsø Q3 tie (2nd leg Aug 13);
+  // kickoff times still TBC by UEFA. Winner of this tie reaches the league phase —
+  // that draw is Fri 2026-08-28, same day as Rennes'/Milan's Europa League draw.
+  { clubId: "brighton", opponent: "CFR Cluj or Tromsø", venue: "A", comp: "UEFA Conference League", date: "2026-08-20" },
+  { clubId: "brighton", opponent: "CFR Cluj or Tromsø", venue: "H", comp: "UEFA Conference League", date: "2026-08-27" },
 ];
 
 // Fixtures whose released date later moved (TV picks etc.). The app deletes the
@@ -398,6 +404,10 @@ export const MOVED_FIXTURES = [
   { clubId: "wrexham",   from: "2026-08-29", to: "2026-08-28" }, // Birmingham H → Friday (Sky)
   { clubId: "wrexham",   from: "2026-09-09", to: "2026-09-08" }, // Burnley H → Tuesday (Sky)
   { clubId: "wrexham",   from: "2026-09-12", to: "2026-09-11" }, // West Ham A → Friday (Sky)
+  // Confirmed 2026-08-04 against ESPN + league TV schedules.
+  { clubId: "rennes",    from: "2026-09-05", to: "2026-09-06" }, // Angers A → Sunday (J3)
+  { clubId: "rennes",    from: "2026-09-12", to: "2026-09-11" }, // Marseille H → Friday night (J4, Ligue 1+)
+  { clubId: "milan",     from: "2026-09-12", to: "2026-09-13" }, // Lazio A → Sunday 20:45 CEST (MD4)
 ];
 
 // Build the seed list app.js merges into saved state. Matchups between two

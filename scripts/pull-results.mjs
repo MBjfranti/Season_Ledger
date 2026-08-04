@@ -216,10 +216,14 @@ async function reportUpcoming() {
     const seed = seedFor(m.clubId, m.date);
     let note = "";
     if (!seed) {
-      const near = SEED_FIXTURES.find(f =>
-        (f.clubId === m.clubId || f.opponentId === m.clubId) &&
-        f.comp === m.comp &&
-        Math.abs(new Date(f.date) - new Date(m.date)) <= 7 * 86400e3);
+      // Nearest same-comp fixture within a week — not merely the first one found,
+      // which mis-reported the neighbouring matchday when a fixture moved.
+      const near = SEED_FIXTURES
+        .filter(f => (f.clubId === m.clubId || f.opponentId === m.clubId) &&
+          f.comp === m.comp &&
+          Math.abs(new Date(f.date) - new Date(m.date)) <= 7 * 86400e3)
+        .sort((a, b) => Math.abs(new Date(a.date) - new Date(m.date)) -
+                        Math.abs(new Date(b.date) - new Date(m.date)))[0];
       note = near
         ? `  << DATE CHANGE? seed has ${near.date} (${near.opponent})`
         : "  << NOT IN SEED (new fixture — cup draw?)";
