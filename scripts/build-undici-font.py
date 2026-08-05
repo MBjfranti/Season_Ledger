@@ -22,8 +22,11 @@ import json
 import os
 import sys
 
+from io import StringIO
+
 from PIL import Image, ImageDraw
 from fontTools.fontBuilder import FontBuilder
+from fontTools.feaLib.builder import addOpenTypeFeatures
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 ATLAS = r"C:\Users\johnf\Desktop\Undici\pipeline\undici\glyph-atlas"
@@ -40,6 +43,9 @@ SPACE = 260
 
 UPSAMPLE = 4      # trace at 4x so the alpha staircase lands under a font unit
 EPSILON = 1.6     # Douglas-Peucker tolerance, in upsampled pixels (~0.4 source px)
+
+KERN_MIN = 8      # ignore adjustments too small to see
+KERN_MAX = 110    # and never yank a pair further than this
 
 
 # ── contour tracing ──────────────────────────────────────────────────────────
@@ -220,6 +226,57 @@ def outlines(img):
     return contours
 
 
+# ── kerning ──────────────────────────────────────────────────────────────────
+
+
+def ink_profile(img):
+    """Per-row leftmost and rightmost ink, in source pixels. None where blank."""
+    a = img.getchannel("A").load()
+    w, h = img.size
+    left, right = [], []
+    for y in range(h):
+        row = [x for x in range(w) if a[x, y] > 128]
+        left.append(row[0] if row else None)
+        right.append(row[-1] + 1 if row else None)
+    return left, right
+
+
+def kern_pairs(glyphs, side, target):
+    """Optical kerning, measured off the letterforms themselves.
+
+    A single side bearing on every glyph is only right for pairs whose facing
+    edges are both flat — H then H. Where one side recedes, the bearings stack
+    on top of the gap the shapes already have: L's upper right is empty, Y's
+    lower left is empty, and "OLYMPIQUE" ends up with what reads as a space in
+    it. So for each ordered pair take the tightest row — the closest the two
+    outlines ever come — and pull them together until that distance equals what
+    a flat pair gets. Never looser, so nothing can collide.
+    """
+    scale = CAP / next(iter(glyphs.values())).height
+    prof = {ch: ink_profile(g) for ch, g in glyphs.items()}
+    widths = {ch: g.width for ch, g in glyphs.items()}
+    bearings = side * 2
+    out = {}
+
+    for a in glyphs:
+        la, ra = prof[a]
+        for b in glyphs:
+            lb, rb = prof[b]
+            gap = None
+            for y in range(len(la)):
+                if ra[y] is None or lb[y] is None:
+                    continue          # one of them has no ink on this row
+                d = (widths[a] - ra[y]) + lb[y]
+                if gap is None or d < gap:
+                    gap = d
+            if gap is None:
+                continue
+            k = round(target - (gap * scale + bearings))
+            if k <= -KERN_MIN:
+                out[(a, b)] = max(k, -KERN_MAX)
+    return out
+
+
 def main():
     if not os.path.isdir(ATLAS):
         sys.exit(f"glyph atlas not found: {ATLAS}")
@@ -266,6 +323,12 @@ def main():
 
     print(f"traced 26 glyphs, {points} points, side bearing {side}")
 
+    kerns = kern_pairs(glyphs, side, side * 2)
+    clamped = sum(1 for v in kerns.values() if v == -KERN_MAX)
+    tightest = sorted(kerns.items(), key=lambda kv: kv[1])[:6]
+    print(f"kerning: {len(kerns)} pairs ({clamped} at the {-KERN_MAX} clamp), tightest " +
+          ", ".join(f"{a}{b} {v}" for (a, b), v in tightest))
+
     fb = FontBuilder(UPEM, isTTF=True)
     fb.setupGlyphOrder(order)
     # Lower case maps to the same caps: the face has no lower case, and folding
@@ -291,6 +354,14 @@ def main():
                 sCapHeight=CAP, sxHeight=CAP, achVendID="UNDC",
                 fsSelection=0x0040, usWeightClass=800, usWidthClass=3)
     fb.setupPost()
+
+    # GPOS rather than the legacy kern table: it is what shaping engines reach
+    # for first. Kerning is keyed on glyphs, so it applies to lower-case input
+    # too — the cmap has already folded it onto the same caps.
+    fea = "feature kern {\n" + "".join(
+        f"  pos {a} {b} {v};\n" for (a, b), v in sorted(kerns.items())
+    ) + "} kern;\n"
+    addOpenTypeFeatures(fb.font, StringIO(fea))
 
     os.makedirs(OUT, exist_ok=True)
     ttf = os.path.join(OUT, "undici-display.ttf")
