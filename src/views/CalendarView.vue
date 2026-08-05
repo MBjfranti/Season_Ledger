@@ -3,14 +3,13 @@ import { computed, ref, nextTick, watch } from "vue";
 import { state, toggleStar, toggleWatched, setFixtureNotes, addFixture,
          activeClubs, activeFixtures } from "../store.js";
 import { fmtDayHead, timeSortKey, addDaysISO, todayISO, fixtureScore,
-         fixtureReasons, matchupLabel, clubById, broadcastFor } from "../utils.js";
+         fixtureReasons, matchupLabel, clubById } from "../utils.js";
 import BcChip from "../components/BcChip.vue";
 import { compAbbr, compSlug } from "../data/competitions.js";
 
 /* ── Filters ───────────────────────────────────────────── */
 const clubFilter = ref(new Set());
 const compFilter = ref("");
-const watchableOnly = ref(false);
 
 const allComps = computed(() => {
   const seen = new Set();
@@ -25,12 +24,11 @@ function toggleClubFilter(id) {
 }
 
 const filtersActive = computed(() =>
-  clubFilter.value.size > 0 || compFilter.value !== "" || watchableOnly.value);
+  clubFilter.value.size > 0 || compFilter.value !== "");
 
 function clearFilters() {
   clubFilter.value = new Set();
   compFilter.value = "";
-  watchableOnly.value = false;
 }
 
 function passesFilters(f) {
@@ -38,7 +36,6 @@ function passesFilters(f) {
       !clubFilter.value.has(f.clubId) &&
       !(f.opponentId && clubFilter.value.has(f.opponentId))) return false;
   if (compFilter.value && f.comp !== compFilter.value) return false;
-  if (watchableOnly.value && !broadcastFor(f.comp).some(b => b.have)) return false;
   return true;
 }
 
@@ -213,10 +210,6 @@ function submitFixture() {
         <option value="">All competitions</option>
         <option v-for="comp in allComps" :key="comp" :value="comp">{{ comp }}</option>
       </select>
-      <button class="filter-chip toggle" :class="{ active: watchableOnly }"
-              :aria-pressed="watchableOnly" @click="watchableOnly = !watchableOnly">
-        <span class="fc-label">✓ Watchable now</span>
-      </button>
       <button v-if="filtersActive" class="btn" @click="clearFilters">Clear</button>
       <span class="cal-spacer"></span>
       <button class="btn" @click="showAdd = true">＋ Add fixture</button>

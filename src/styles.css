@@ -807,6 +807,14 @@ details.preview .prose { padding: 4px 22px 22px; }
 .tag.backup { background: var(--draw-soft); color: var(--draw); border: 1px solid var(--draw-line); }
 .tag.awaiting { background: transparent; color: var(--text-3); border: 1px dashed var(--text-3); }
 
+/* Broadcast pills. Every service is assumed available, so the pill carries no
+   availability signal — it just says which channel, in that channel's colour.
+
+   The fill is a wash of the brand rather than the brand itself: a grid of
+   fixture cards puts a dozen of these on screen at once, and at full strength
+   they shouted over the match names they belong to. Softening the fill and
+   keeping the ink at full strength — rather than fading the whole pill —
+   keeps 11.5px text legible against the cream panel. */
 .bc {
   font-family: var(--sans);
   font-size: var(--fs-xs);
@@ -814,10 +822,24 @@ details.preview .prose { padding: 4px 22px 22px; }
   border-radius: var(--r-pill);
   padding: 3px 10px;
   white-space: nowrap;
+  background: var(--bc-tint);
+  color: var(--bc-ink);
+  border: 1px solid var(--bc-line);
 }
-.bc.have { color: var(--win); border: 1px solid var(--win-line); background: var(--win-soft); }
-.bc.need { color: var(--draw); border: 1px solid var(--draw-line); background: var(--draw-soft); }
 .bc + .bc { margin-left: 4px; }
+
+.bc-espn      { --bc-ink: #b00909; --bc-tint: rgba(213,10,10,0.13);  --bc-line: rgba(213,10,10,0.34); }
+.bc-paramount { --bc-ink: #0b4fc4; --bc-tint: rgba(0,100,255,0.12);  --bc-line: rgba(0,100,255,0.30); }
+.bc-peacock   { --bc-ink: #8a6206; --bc-tint: rgba(245,182,13,0.22); --bc-line: rgba(199,146,10,0.44); }
+.bc-bein      { --bc-ink: #63267d; --bc-tint: rgba(99,38,125,0.13);  --bc-line: rgba(99,38,125,0.32); }
+.bc-fandango  { --bc-ink: #ab4708; --bc-tint: rgba(226,98,15,0.15);  --bc-line: rgba(226,98,15,0.34); }
+.bc-usa       { --bc-ink: #1a3d8f; --bc-tint: rgba(26,61,143,0.12);  --bc-line: rgba(26,61,143,0.30); }
+.bc-tudn      { --bc-ink: #04703b; --bc-tint: rgba(0,148,77,0.14);   --bc-line: rgba(0,148,77,0.34); }
+/* Rights not yet settled — no brand to borrow, so it stays neutral. */
+.bc-tbd {
+  --bc-ink: var(--text-3); --bc-tint: transparent; --bc-line: var(--panel-edge);
+  border-style: dashed;
+}
 
 /* Month jump bar */
 .month-nav {
@@ -1262,7 +1284,6 @@ h3.mini-day-head { margin: 0 0 2px; }
 }
 .comp-format { font-size: var(--fs-sm); color: var(--text-2); }
 .comp-hero-side { text-align: right; }
-.comp-bc-note { margin-top: 6px; font-size: var(--fs-xs); color: var(--text-3); font-style: italic; }
 
 .comp-cols { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 22px; }
 @media (max-width: 900px) { .comp-cols { grid-template-columns: 1fr; } }

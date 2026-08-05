@@ -257,6 +257,26 @@ function findStored(rec, claimed) {
     Math.abs(new Date(b.date) - new Date(rec.date)))[0];
 }
 
+// An API record describes the match from the side ESPN's event matched on. A
+// tracked-club matchup is stored ONCE, under whichever side owns the entry, and
+// that need not be the same side — findStored deliberately matches the pair in
+// either order. Copying the record across unflipped is what produced fixtures
+// like "Rennes v Stade Rennais": Rennes' entry wearing PSG's description of the
+// game, opponent and venue and all.
+function toPerspective(rec, clubId) {
+  if (rec.clubId === clubId) return rec;
+  const club = clubById(rec.clubId);
+  return {
+    ...rec,
+    clubId,
+    opponentId: rec.clubId,
+    opponent: club ? club.name : rec.opponent,
+    venue: rec.venue === "H" ? "A" : rec.venue === "A" ? "H" : rec.venue,
+    gf: rec.ga,
+    ga: rec.gf,
+  };
+}
+
 function logResultDirect(rec) {
   const club = clubById(rec.clubId);
   if (!state.matches[rec.clubId]) state.matches[rec.clubId] = [];
@@ -287,10 +307,12 @@ export function applyApiRecords(records) {
   for (const rec of records) {
     const existing = findStored(rec, claimed);
     if (existing) claimed.add(existing.id);
+    // Say it the way the stored fixture's owner would; scores flip with it.
+    const view = existing ? toPerspective(rec, existing.clubId) : rec;
 
     if (rec.completed) {
       if (logged.has(rec.clubId + "|" + rec.date)) { stats.skipped++; continue; }
-      if (existing) applyFixtureResult(existing, rec.gf, rec.ga);
+      if (existing) applyFixtureResult(existing, view.gf, view.ga);
       else logResultDirect(rec);
       logged.add(rec.clubId + "|" + rec.date);
       if (rec.opponentId) logged.add(rec.opponentId + "|" + rec.date);
@@ -299,13 +321,13 @@ export function applyApiRecords(records) {
     }
 
     if (existing) {
-      existing.eid = rec.eid;
-      existing.date = rec.date;
-      existing.comp = rec.comp;
-      existing.opponent = rec.opponent;
-      existing.venue = rec.venue;
-      existing.opponentId = rec.opponentId;
-      if (rec.time) existing.time = rec.time;
+      existing.eid = view.eid;
+      existing.date = view.date;
+      existing.comp = view.comp;
+      existing.opponent = view.opponent;
+      existing.venue = view.venue;
+      existing.opponentId = view.opponentId;
+      if (view.time) existing.time = view.time;
       stats.updated++;
     } else {
       state.fixtures.push({
@@ -319,7 +341,7 @@ export function applyApiRecords(records) {
   return stats;
 }
 
-export const syncState = reactive({ running: false, message: "", error: "" });
+export const syncState = reactive({ running: false, message: "", error: "", auto: false });
 
 export async function syncFromApi({ from, to } = {}) {
   if (syncState.running) return null;
@@ -349,6 +371,49 @@ export async function syncFromApi({ from, to } = {}) {
   } finally {
     syncState.running = false;
   }
+}
+
+/* ── Automatic sync ────────────────────────────────────────
+   The schedule goes stale on its own — kickoff times move, scores land — so
+   a sync runs by itself once the last one is more than 15 minutes old, and
+   the button becomes something you press only when you are impatient. */
+
+const SYNC_MAX_AGE = 15 * 60 * 1000;
+const SYNC_POLL = 60 * 1000;
+
+// A failed sync leaves apiSyncedAt untouched, so age alone would put us back
+// over the threshold on the very next tick and retry against a dead network
+// every minute. Attempts are tracked separately and get the same cooldown.
+let lastAttempt = 0;
+
+export function syncAge() {
+  if (!state.apiSyncedAt) return Infinity;
+  return Date.now() - new Date(state.apiSyncedAt).getTime();
+}
+
+export function autoSyncTick() {
+  if (syncState.running) return false;
+  if (typeof document !== "undefined" && document.hidden) return false;
+  if (syncAge() < SYNC_MAX_AGE) return false;
+  if (Date.now() - lastAttempt < SYNC_MAX_AGE) return false;
+  // Nothing to ask ESPN about; syncFromApi would only throw and light up the
+  // error line under the button.
+  if (!activeClubs.value.some(c => c.espnId)) return false;
+
+  lastAttempt = Date.now();
+  syncState.auto = true;
+  syncFromApi().finally(() => { syncState.auto = false; });
+  return true;
+}
+
+export function startAutoSync() {
+  // Let the first paint through before touching the network.
+  setTimeout(autoSyncTick, 1500);
+  setInterval(autoSyncTick, SYNC_POLL);
+  // Coming back to a tab left open overnight should not wait for the next tick.
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) autoSyncTick();
+  });
 }
 
 /* ── Derived data ──────────────────────────────────────── */

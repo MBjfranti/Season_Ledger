@@ -76,13 +76,17 @@ const lastSync = computed(() => {
               <div class="set-league">Fixtures &amp; results</div>
               <button class="btn sync-btn" type="button"
                       :disabled="syncState.running" @click="syncFromApi()">
-                {{ syncState.running ? "Syncing…" : "Sync from ESPN" }}
+                {{ syncState.running
+                   ? (syncState.auto ? "Syncing automatically…" : "Syncing…")
+                   : "Sync from ESPN" }}
               </button>
               <div class="sync-meta">Last sync: {{ lastSync }}</div>
               <div v-if="syncState.message" class="sync-meta">{{ syncState.message }}</div>
               <div v-if="syncState.error" class="sync-err">{{ syncState.error }}</div>
-              <div class="atmos-hint">Pulls the live schedule and any finished
-                scores. Your watched marks, stars and notes are kept.</div>
+              <div class="atmos-hint">Runs on its own once the last sync is more
+                than 15 minutes old — the button is only for when you are
+                impatient. Pulls the live schedule and any finished scores;
+                your watched marks, stars and notes are kept.</div>
             </div>
           </div>
         </div>

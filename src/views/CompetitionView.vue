@@ -42,7 +42,6 @@ const headline = computed(() => {
 });
 
 const broadcasts = computed(() => name.value ? broadcastFor(name.value) : []);
-const haveIt = computed(() => broadcasts.value.some(b => b.have));
 </script>
 
 <template>
@@ -59,9 +58,6 @@ const haveIt = computed(() => broadcasts.value.some(b => b.have));
         </div>
         <div class="comp-hero-side">
           <div class="comp-bc"><BcChip :comp="name" /></div>
-          <div class="comp-bc-note">
-            {{ haveIt ? "Covered by a service you have" : "Not on a service you have" }}
-          </div>
         </div>
       </header>
 

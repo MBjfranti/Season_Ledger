@@ -15,28 +15,31 @@ export const LEAGUES = {
 };
 
 // US broadcast rights mapped to the owner's services. Each competition lists
-// every relevant service; each renders as its own chip. Spanish-language feeds
-// (the owner often prefers them) get their own chip with note "Esp.".
-// have: true = already subscribed (ESPN+, Peacock, Paramount+) or free (Fandango); false = not yet.
+// every relevant service; each renders as its own branded pill. Spanish-language
+// feeds (the owner often prefers them) get their own pill with note "Esp.".
+//
+// Every service is assumed available — there is no subscribed/not-subscribed
+// split any more, so a pill says which channel carries the match and nothing
+// else. `brand` picks the pill colour; see .bc-* in styles.css.
 export const BROADCAST = {
-  "Premier League":          [{ svc: "Peacock · Esp.", have: true }],
-  "EFL Championship":        [{ svc: "Paramount+", have: true }],
-  "EFL Cup":                 [{ svc: "Paramount+", have: true }],
-  "FA Cup":                  [{ svc: "ESPN+", have: true }],
-  "Ligue 1":                 [{ svc: "beIN Sports · Esp.", have: false, note: "planned" }],
-  "Coupe de France":         [{ svc: "Check listings", have: false }],
-  "La Liga":                 [{ svc: "ESPN+ · Esp.", have: true }],
-  "Copa del Rey":            [{ svc: "ESPN+", have: true }],
-  "Serie A":                 [{ svc: "Paramount+", have: true }],
-  "Coppa Italia":            [{ svc: "Paramount+", have: true }],
-  "Bundesliga":              [{ svc: "Fandango", have: true, note: "free" },
-                              { svc: "USA Network", have: false },
-                              { svc: "Peacock", have: true, note: "Esp." }],
-  "DFB-Pokal":               [{ svc: "Check listings", have: false, note: "US rights TBD post-ESPN" }],
-  "UEFA Conference League":  [{ svc: "Paramount+", have: true }],
-  "UEFA Europa League":      [{ svc: "Paramount+", have: true }],
-  "UEFA Champions League":   [{ svc: "Paramount+", have: true },
-                              { svc: "TUDN", have: false, note: "Esp." }],
+  "Premier League":          [{ svc: "Peacock · Esp.", brand: "peacock" }],
+  "EFL Championship":        [{ svc: "Paramount+", brand: "paramount" }],
+  "EFL Cup":                 [{ svc: "Paramount+", brand: "paramount" }],
+  "FA Cup":                  [{ svc: "ESPN+", brand: "espn" }],
+  "Ligue 1":                 [{ svc: "beIN Sports · Esp.", brand: "bein" }],
+  "Coupe de France":         [{ svc: "Check listings", brand: "tbd" }],
+  "La Liga":                 [{ svc: "ESPN+ · Esp.", brand: "espn" }],
+  "Copa del Rey":            [{ svc: "ESPN+", brand: "espn" }],
+  "Serie A":                 [{ svc: "Paramount+", brand: "paramount" }],
+  "Coppa Italia":            [{ svc: "Paramount+", brand: "paramount" }],
+  "Bundesliga":              [{ svc: "Fandango", brand: "fandango", note: "free" },
+                              { svc: "USA Network", brand: "usa" },
+                              { svc: "Peacock", brand: "peacock", note: "Esp." }],
+  "DFB-Pokal":               [{ svc: "Check listings", brand: "tbd" }],
+  "UEFA Conference League":  [{ svc: "Paramount+", brand: "paramount" }],
+  "UEFA Europa League":      [{ svc: "Paramount+", brand: "paramount" }],
+  "UEFA Champions League":   [{ svc: "Paramount+", brand: "paramount" },
+                              { svc: "TUDN", brand: "tudn", note: "Esp." }],
 };
 
 // Derby / rivalry opponents per club (matched by substring, case-insensitive).

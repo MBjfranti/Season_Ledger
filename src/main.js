@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 import App from "./App.vue";
+import { startAutoSync } from "./store.js";
 import DashboardView from "./views/DashboardView.vue";
 import CalendarView from "./views/CalendarView.vue";
 import ClubView from "./views/ClubView.vue";
@@ -21,3 +22,5 @@ const router = createRouter({
 });
 
 createApp(App).use(router).mount("#app");
+
+startAutoSync();

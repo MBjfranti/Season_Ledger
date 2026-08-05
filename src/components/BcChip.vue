@@ -7,5 +7,5 @@ const services = computed(() => broadcastFor(props.comp));
 </script>
 
 <template>
-  <span v-for="(b, i) in services" :key="i" :class="b.have ? 'bc have' : 'bc need'">{{ b.have ? "✓" : "+" }} {{ b.svc }}<template v-if="b.note"> ({{ b.note }})</template></span>
+  <span v-for="(b, i) in services" :key="i" class="bc" :class="`bc-${b.brand || 'tbd'}`">{{ b.svc }}<template v-if="b.note"> ({{ b.note }})</template></span>
 </template>

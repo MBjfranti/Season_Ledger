@@ -67,7 +67,7 @@ export function resultLetter(gf, ga) {
 }
 
 export function broadcastFor(comp) {
-  return BROADCAST[comp] || [{ svc: "Check listings", have: false }];
+  return BROADCAST[comp] || [{ svc: "Check listings", brand: "tbd" }];
 }
 
 function matchesAny(name, list) {
