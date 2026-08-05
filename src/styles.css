@@ -79,8 +79,7 @@
   --on-pitch-2: rgba(255,255,255,0.78);
   --on-pitch-line: rgba(255,255,255,0.24);
 
-  /* Frosted-glass tokens — midday defaults; atmosphere.js interpolates these
-     across the day (keys start with "-" so they ride the clock for free). */
+  /* Frosted-glass tokens. */
   --glass-fill: rgba(255,251,244,0.55);
   --glass-stroke: rgba(255,255,255,0.55);
   --glass-hi: rgba(255,255,255,0.75);
@@ -92,97 +91,9 @@
   --plaster: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
 }
 
-/* The palette is driven by the hour of day via [data-phase] on <html>
-   (see atmosphere.js). :root above is midday; the phases below are the
-   courtyard at dawn, golden hour, and night. */
-
-/* Dawn — first light; plaster still cool, a low pink-gold sun */
-:root[data-phase="dawn"] {
-  --bg: #e7ddce;
-  --bg-raised: #f7f0e4;
-  --panel: #f3ebdd;
-  --panel-hover: #ece1d0;
-  --panel-edge: #dccdb6;
-  --hairline: #e7dbc8;
-  --text: #2f2319;
-  --text-2: #6d5b47;
-  --text-3: #8b7961;
-  --accent: #b1573a;
-  --accent-hover: #97472b;
-  --on-accent: #fdf6ea;
-  --win:  #516a2c; --win-fill:  #617e40; --on-win:  #f7f4e6;
-  --draw: #986b0f; --draw-fill: #bb851f; --on-draw: #2c2410;
-  --loss: #b23e30; --loss-fill: #bb4234; --on-loss: #fdf1ea;
-  --focus: #2f8a99;
-  --win-soft: rgba(97,126,64,0.13);  --win-line: rgba(97,126,64,0.40);
-  --draw-soft: rgba(187,133,31,0.15); --draw-line: rgba(187,133,31,0.44);
-  --loss-soft: rgba(187,66,52,0.11);  --loss-line: rgba(187,66,52,0.36);
-  --glow: 0 12px 34px rgba(177,87,58,0.20);
-  --kit-edge: rgba(74,52,28,0.13);
-  --sun-wash:
-    radial-gradient(66% 62% at 6% 10%, rgba(255,229,206,0.82), rgba(255,229,206,0) 60%),
-    radial-gradient(60% 50% at 92% -8%, rgba(150,178,205,0.16), rgba(150,178,205,0) 55%);
-}
-
-/* Golden hour — long warm light from the west; terracotta deepens */
-:root[data-phase="golden"] {
-  --bg: #ecdcbe;
-  --bg-raised: #fbf1db;
-  --panel: #f8ecd4;
-  --panel-hover: #f2e3c6;
-  --panel-edge: #e0caa1;
-  --hairline: #ecdbbc;
-  --text: #2c1e12;
-  --text-2: #6a5535;
-  --text-3: #927849;
-  --accent: #a8461d;
-  --accent-hover: #8b380f;
-  --on-accent: #fdf5e6;
-  --win:  #556d2c; --win-fill:  #647f3b; --on-win:  #f8f4e2;
-  --draw: #a5720a; --draw-fill: #c98f18; --on-draw: #2c2410;
-  --loss: #b53a26; --loss-fill: #bf3f2a; --on-loss: #fdf1ea;
-  --focus: #2c8794;
-  --win-soft: rgba(100,127,59,0.14);  --win-line: rgba(100,127,59,0.42);
-  --draw-soft: rgba(201,143,24,0.16);  --draw-line: rgba(201,143,24,0.46);
-  --loss-soft: rgba(191,63,42,0.12);   --loss-line: rgba(191,63,42,0.38);
-  --glow: 0 14px 36px rgba(199,110,52,0.28);
-  --kit-edge: rgba(74,46,22,0.16);
-  --sun-wash:
-    radial-gradient(70% 66% at 96% 24%, rgba(255,200,120,0.40), rgba(255,200,120,0) 60%),
-    radial-gradient(82% 72% at 100% 72%, rgba(214,120,60,0.22), rgba(214,120,60,0) 58%);
-}
-
-/* Night — the courtyard by lantern and fire */
-:root[data-phase="night"] {
-  color-scheme: dark;
-  --bg: #191410;
-  --bg-raised: #221a13;
-  --panel: #241c14;
-  --panel-hover: #2e2418;
-  --panel-edge: #3b2f21;
-  --hairline: #302619;
-  --text: #f4ead9;
-  --text-2: #cbb9a1;
-  --text-3: #9c8a72;
-  --accent: #e08a54;
-  --accent-hover: #ec9b68;
-  --on-accent: #24110a;
-  --win:  #9dbd6a; --win-fill:  #9dbd6a; --on-win:  #16200c;
-  --draw: #f0c25e; --draw-fill: #f0c25e; --on-draw: #241d07;
-  --loss: #f08c6b; --loss-fill: #f08c6b; --on-loss: #2a110c;
-  --focus: #5cc4d1;
-  --win-soft: rgba(157,189,106,0.13);  --win-line: rgba(157,189,106,0.42);
-  --draw-soft: rgba(240,194,94,0.13);  --draw-line: rgba(240,194,94,0.46);
-  --loss-soft: rgba(240,140,107,0.13); --loss-line: rgba(240,140,107,0.42);
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.45);
-  --shadow-md: 0 2px 6px rgba(0,0,0,0.4), 0 14px 32px rgba(0,0,0,0.5);
-  --shadow-lg: 0 20px 52px rgba(0,0,0,0.6);
-  --glow: 0 14px 36px rgba(224,138,84,0.28);
-  --kit-edge: rgba(255,240,220,0.12);
-  --sun-wash:
-    radial-gradient(70% 60% at 85% 92%, rgba(240,150,70,0.12), rgba(240,150,70,0) 62%),
-    radial-gradient(56% 46% at 12% 90%, rgba(230,110,50,0.10), rgba(230,110,50,0) 58%);
-}
+/* Day only. The palette was previously interpolated across a 24h clock by
+   atmosphere.js, with dawn / golden / night variants living here; that engine
+   is gone and :root above is now the single static palette. */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1260,7 +1171,6 @@ h3.mini-day-head { margin: 0 0 2px; }
   font-family: var(--data); font-size: 12.5px; letter-spacing: 0.04em;
   color: var(--text); margin-bottom: 10px;
 }
-.atmos-range { width: 100%; accent-color: var(--accent); cursor: pointer; }
 .atmos-hint { font-size: 11.5px; color: var(--text-3); margin-top: 8px; font-style: italic; }
 
 /* Marks a preview the app wrote rather than the owner. */
@@ -1597,30 +1507,18 @@ html[data-club-theme] {
   --grass-line: rgba(255,255,255,0.16);
 }
 
-/* Fixed shaft of daylight (or low lantern glow) behind everything.
-   --sun-wash and --ember are interpolated continuously in atmosphere.js. */
+/* Fixed shaft of daylight behind everything. */
 body::before {
   content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
   background: var(--sun-wash);
 }
-/* Ground-level warmth — fires and lanterns after dark */
-body::after {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  opacity: var(--ember, 0);
-  background:
-    radial-gradient(46% 34% at 82% 96%, rgba(255,172,84,0.17), transparent 70%),
-    radial-gradient(34% 26% at 12% 94%, rgba(255,140,60,0.13), transparent 70%);
-}
-
 /* A single restrained shaft of daylight from the top-left corner — light
    spilling in from the courtyard's open side, confined to the upper-left so it
    reads as directional, not a full-width exposure wash. Fixed above content,
-   screen-blended, never clickable; fades out at night via --daylight. (Night
-   warmth lives in the panel lantern-glows + base sun-wash, no margin blobs.) */
+   screen-blended, never clickable. */
 .light-cast { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
 .light-cast::before {
   content: ""; position: absolute; inset: 0; mix-blend-mode: screen;
-  opacity: var(--daylight, 1);
   background:
     /* warm light pooling in from an opening at the top-left */
     radial-gradient(42% 40% at 14% -6%, rgba(255,243,212,0.55), rgba(255,243,212,0) 60%),

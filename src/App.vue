@@ -1,6 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
-import { startClock, stopClock } from "./atmosphere.js";
+import { ref, computed } from "vue";
 import { LEAGUES, CLUBS } from "./data/data.js";
 import { isFollowed, toggleClub, activeClubs, state, syncFromApi, syncState } from "./store.js";
 
@@ -38,10 +37,6 @@ const lastSync = computed(() => {
   if (hrs < 24) return `${hrs} hr ago`;
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 });
-
-// The atmosphere clock still drives the palette; only its scrub control is gone.
-onMounted(startClock);
-onUnmounted(stopClock);
 </script>
 
 <template>
