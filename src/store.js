@@ -171,9 +171,10 @@ function mergeResults() {
     } else if (r.opponent) {
       if (!state.matches[r.clubId]) state.matches[r.clubId] = [];
       state.matches[r.clubId].push({
-        id: uid(), date: r.date, comp: r.comp || clubById(r.clubId).leagueComp,
+        id: uid(), date: r.date, time: r.time || "",
+        comp: r.comp || clubById(r.clubId).leagueComp,
         opponent: r.opponent, venue: r.venue || "N", gf: r.gf, ga: r.ga,
-        notes: "", watched: false,
+        notes: "", watched: false, mustWatch: false,
       });
     }
   }
@@ -183,17 +184,17 @@ function applyFixtureResult(f, gf, ga) {
   const club = clubById(f.clubId);
   if (!state.matches[f.clubId]) state.matches[f.clubId] = [];
   state.matches[f.clubId].push({
-    id: uid(), date: f.date, comp: f.comp,
+    id: uid(), date: f.date, time: f.time || "", comp: f.comp,
     opponent: f.opponent, venue: f.venue || "N", gf, ga,
-    notes: f.notes || "", watched: !!f.watched,
+    notes: f.notes || "", watched: !!f.watched, mustWatch: !!f.mustWatch,
   });
   if (f.opponentId) {
     const oppVenue = f.venue === "H" ? "A" : f.venue === "A" ? "H" : (f.venue || "N");
     if (!state.matches[f.opponentId]) state.matches[f.opponentId] = [];
     state.matches[f.opponentId].push({
-      id: uid(), date: f.date, comp: f.comp,
+      id: uid(), date: f.date, time: f.time || "", comp: f.comp,
       opponent: club.name, venue: oppVenue, gf: ga, ga: gf,
-      notes: f.notes || "", watched: !!f.watched,
+      notes: f.notes || "", watched: !!f.watched, mustWatch: !!f.mustWatch,
     });
   }
   state.fixtures = state.fixtures.filter(x => x.id !== f.id);
@@ -229,6 +230,38 @@ export const activeClubs = computed(() => CLUBS.filter(c => isFollowed(c.id)));
 // the home club, so it survives as long as either side is still followed.
 export const activeFixtures = computed(() => state.fixtures.filter(f =>
   isFollowed(f.clubId) || (f.opponentId && isFollowed(f.opponentId))));
+
+// Played matches, shaped like fixtures so the calendar can keep showing the day
+// after the score lands. A result moves the entry out of state.fixtures and into
+// state.matches; without this the day would simply empty itself and take its
+// notes and watched mark out of reach on the way out.
+export const playedFixtures = computed(() => {
+  const rows = [];
+  for (const [clubId, ms] of Object.entries(state.matches)) {
+    if (!isFollowed(clubId)) continue;
+    for (const m of ms) {
+      if (!m.date) continue;
+      rows.push({
+        id: `m:${clubId}:${m.id}`, matchId: m.id, played: true,
+        clubId, opponent: m.opponent, opponentId: detectOpponentId(clubId, m.opponent),
+        venue: m.venue, comp: m.comp, date: m.date, time: m.time || "",
+        gf: m.gf, ga: m.ga,
+        mustWatch: !!m.mustWatch, watched: !!m.watched, notes: m.notes || "",
+      });
+    }
+  }
+  // A tie between two followed clubs is logged under both of them. Keep one
+  // copy — the home side's, to match how a fixture is stored — so the calendar
+  // doesn't show the same game twice from either end.
+  const kept = new Map();
+  for (const r of rows) {
+    if (!(r.opponentId && isFollowed(r.opponentId))) { kept.set(r.id, r); continue; }
+    const key = [r.clubId, r.opponentId].sort().join("~") + "|" + r.date;
+    const prev = kept.get(key);
+    if (!prev || (r.venue === "H" && prev.venue !== "H")) kept.set(key, r);
+  }
+  return [...kept.values()];
+});
 
 /* ── Live sync from the API ────────────────────────────── */
 
@@ -281,15 +314,18 @@ function logResultDirect(rec) {
   const club = clubById(rec.clubId);
   if (!state.matches[rec.clubId]) state.matches[rec.clubId] = [];
   state.matches[rec.clubId].push({
-    id: uid(), date: rec.date, comp: rec.comp, opponent: rec.opponent,
-    venue: rec.venue || "N", gf: rec.gf, ga: rec.ga, notes: "", watched: false,
+    id: uid(), date: rec.date, time: rec.time || "", comp: rec.comp, opponent: rec.opponent,
+    venue: rec.venue || "N", gf: rec.gf, ga: rec.ga,
+    notes: "", watched: false, mustWatch: false,
   });
   if (rec.opponentId) {
     const flip = rec.venue === "H" ? "A" : rec.venue === "A" ? "H" : rec.venue;
     if (!state.matches[rec.opponentId]) state.matches[rec.opponentId] = [];
     state.matches[rec.opponentId].push({
-      id: uid(), date: rec.date, comp: rec.comp, opponent: club ? club.name : rec.clubId,
-      venue: flip || "N", gf: rec.ga, ga: rec.gf, notes: "", watched: false,
+      id: uid(), date: rec.date, time: rec.time || "", comp: rec.comp,
+      opponent: club ? club.name : rec.clubId,
+      venue: flip || "N", gf: rec.ga, ga: rec.gf,
+      notes: "", watched: false, mustWatch: false,
     });
   }
 }
@@ -451,6 +487,40 @@ export function toggleWatched(id) {
 export function setFixtureNotes(id, notes) {
   const f = state.fixtures.find(x => x.id === id);
   if (f) f.notes = notes.trim();
+}
+
+/* Annotations on a match that has already been played. A two-club tie is logged
+   under both clubs, so every write lands on both copies — otherwise the note you
+   leave on the calendar is missing from one of the two club pages. */
+
+function eachMatchCopy(clubId, matchId, fn) {
+  const m = (state.matches[clubId] || []).find(x => x.id === matchId);
+  if (!m) return;
+  fn(m);
+  const oppId = detectOpponentId(clubId, m.opponent);
+  const mirror = oppId && (state.matches[oppId] || []).find(x => x.date === m.date);
+  if (mirror) fn(mirror);
+}
+
+// Both copies are set to one computed value rather than flipped independently,
+// so a pair that has drifted apart comes back into agreement instead of staying
+// inverted forever.
+export function toggleMatchStar(clubId, matchId) {
+  const m = (state.matches[clubId] || []).find(x => x.id === matchId);
+  if (!m) return;
+  const v = !m.mustWatch;
+  eachMatchCopy(clubId, matchId, x => { x.mustWatch = v; });
+}
+
+export function toggleMatchWatched(clubId, matchId) {
+  const m = (state.matches[clubId] || []).find(x => x.id === matchId);
+  if (!m) return;
+  const v = !m.watched;
+  eachMatchCopy(clubId, matchId, x => { x.watched = v; });
+}
+
+export function setMatchNotes(clubId, matchId, notes) {
+  eachMatchCopy(clubId, matchId, x => { x.notes = notes.trim(); });
 }
 
 export function addFixture({ clubId, opponent, venue, comp, date, time, mustWatch }) {

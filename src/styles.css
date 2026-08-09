@@ -806,6 +806,12 @@ details.preview .prose { padding: 4px 22px 22px; }
 .tag.watch { background: var(--win-fill); color: var(--on-win); }
 .tag.backup { background: var(--draw-soft); color: var(--draw); border: 1px solid var(--draw-line); }
 .tag.awaiting { background: transparent; color: var(--text-3); border: 1px dashed var(--text-3); }
+/* The score a played match wears in place of its Watch/Backup pick. The result
+   letter carries the colour, so the scoreline reads at a glance in a stack. */
+.tag.result { font-family: var(--data); letter-spacing: 0.04em; }
+.tag.result.res-W { background: var(--win-soft); color: var(--win); border: 1px solid var(--win-line); }
+.tag.result.res-D { background: var(--draw-soft); color: var(--draw); border: 1px solid var(--draw-line); }
+.tag.result.res-L { background: var(--loss-soft); color: var(--loss); border: 1px solid var(--loss-line); }
 
 /* Broadcast pills. Every service is assumed available, so the pill carries no
    availability signal — it just says which channel, in that channel's colour.
@@ -906,6 +912,9 @@ details.preview .prose { padding: 4px 22px 22px; }
   background: var(--win-soft);
 }
 .fx-card.is-watched { opacity: 0.82; }
+/* A played match is settled, not dimmed out of reach — the actions on it are
+   still the point of opening the day. */
+.fx-card.is-played { background: var(--bg-raised); }
 .fx-card .kit { height: 8px; flex: none; }
 .kit-pair { display: flex; flex-direction: column; }
 .kit-pair .kit { height: 5px; display: block; box-shadow: none; }
@@ -1664,7 +1673,9 @@ body::before {
 .cal-cell.has { cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
 .cal-cell.has:hover { transform: translateY(-2px); box-shadow: var(--glow); border-color: var(--accent); }
 .cal-cell.picked { border-color: var(--accent); box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--accent); }
-.cal-cell.past.has { opacity: 0.62; }
+/* Past days recede, but they stay legible and clickable — the result and the
+   notes on them are still worth opening. */
+.cal-cell.past.has { opacity: 0.78; }
 .cal-cell.today { border-color: var(--accent); }
 .cell-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .cell-num { font-family: var(--sans); font-size: var(--fs-xs); color: var(--text-3); }
@@ -1677,6 +1688,10 @@ body::before {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .cell-time { flex: none; font-family: var(--data); font-size: var(--fs-2xs); color: var(--text-3); letter-spacing: 0.02em; }
+.cell-score { font-weight: var(--fw-ui); }
+.cell-score.res-W { color: var(--win); }
+.cell-score.res-D { color: var(--draw); }
+.cell-score.res-L { color: var(--loss); }
 .cell-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .cell-foot .dc-kits { display: flex; gap: 3px; }
 .cell-foot .kit { width: 16px; height: 7px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--kit-edge); }

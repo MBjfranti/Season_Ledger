@@ -1,9 +1,10 @@
 <script setup>
 import { computed, ref, nextTick, watch } from "vue";
 import { state, toggleStar, toggleWatched, setFixtureNotes, addFixture,
-         activeClubs, activeFixtures } from "../store.js";
+         toggleMatchStar, toggleMatchWatched, setMatchNotes,
+         activeClubs, activeFixtures, playedFixtures } from "../store.js";
 import { fmtDayHead, timeSortKey, addDaysISO, todayISO, fixtureScore,
-         fixtureReasons, matchupLabel, clubById } from "../utils.js";
+         fixtureReasons, matchupLabel, resultLetter, clubById } from "../utils.js";
 import BcChip from "../components/BcChip.vue";
 import { compAbbr, compSlug } from "../data/competitions.js";
 
@@ -42,8 +43,13 @@ function passesFilters(f) {
 /* ── Each match DAY nominates its own Watch + Backups ──────
    Grouping by day (not week) so a busy stretch surfaces a pick
    every matchday instead of one lone pick for the whole week. */
+// A day is everything on it, played or not: a game does not leave the calendar
+// the moment its score lands, so notes and the watched mark stay reachable
+// afterwards — which is the only time you actually have something to say.
+const allFixtures = computed(() => [...activeFixtures.value, ...playedFixtures.value]);
+
 const days = computed(() => {
-  const dated = activeFixtures.value.filter(f => f.date && passesFilters(f))
+  const dated = allFixtures.value.filter(f => f.date && passesFilters(f))
     .sort((a, b) => a.date.localeCompare(b.date));
   const byDay = new Map();
   for (const f of dated) {
@@ -58,6 +64,7 @@ const days = computed(() => {
 });
 
 function tagFor(day, f) {
+  if (f.played) return "result";
   if (f.date < todayISO()) return "awaiting";
   const rank = day.ranked.indexOf(f);
   if (rank === 0) return "watch";      // the day's top pick
@@ -73,6 +80,19 @@ const tagMap = computed(() => {
 
 function displayReasons(f) {
   return fixtureReasons(f).filter(r => r !== "Marked must-watch");
+}
+
+/* ── Played matches ────────────────────────────────────────
+   Same cards, same buttons — the writes just go to the match log rather than to
+   the fixture list, since a played game lives on the other side of that line. */
+const resOf = f => resultLetter(f.gf, f.ga);
+const scoreOf = f => `${resultLetter(f.gf, f.ga)} ${f.gf}–${f.ga}`;
+
+function onStar(f) {
+  f.played ? toggleMatchStar(f.clubId, f.matchId) : toggleStar(f.id);
+}
+function onWatched(f) {
+  f.played ? toggleMatchWatched(f.clubId, f.matchId) : toggleWatched(f.id);
 }
 
 /* ── Months + the selected month's matchdays ───────────── */
@@ -166,7 +186,8 @@ function openNotes(f) {
   nextTick(() => document.querySelector(".notes-form input")?.focus());
 }
 function saveNote(f) {
-  setFixtureNotes(f.id, noteDraft.value);
+  if (f.played) setMatchNotes(f.clubId, f.matchId, noteDraft.value);
+  else setFixtureNotes(f.id, noteDraft.value);
   openNotesFor.value = null;
 }
 
@@ -242,7 +263,8 @@ function submitFixture() {
             <template v-if="c.count">
               <div class="cell-match">{{ matchupLabel(c.top) }}</div>
               <div class="cell-time">
-                {{ c.top.time || "Time TBD" }}
+                <span v-if="c.top.played" class="cell-score" :class="`res-${resOf(c.top)}`">{{ scoreOf(c.top) }}</span>
+                <template v-else>{{ c.top.time || "Time TBD" }}</template>
                 <span class="cell-comp">{{ compAbbr(c.top.comp) }}</span>
               </div>
               <div class="cell-foot">
@@ -265,32 +287,35 @@ function submitFixture() {
         </header>
         <div class="drawer-body" :class="drawerDensity">
           <div v-for="f in selectedDayData.fixtures" :key="f.id" class="fx-card"
-               :class="{ 'is-watch': tagMap.get(f.id) === 'watch', 'is-watched': f.watched }">
+               :class="{ 'is-watch': tagMap.get(f.id) === 'watch', 'is-watched': f.watched,
+                         'is-played': f.played }">
             <div v-if="f.opponentId" class="kit-pair">
               <span class="kit" :class="`kit-${f.clubId}`"></span><span class="kit" :class="`kit-${f.opponentId}`"></span>
             </div>
             <div v-else class="kit" :class="`kit-${f.clubId}`"></div>
             <div class="fx-body">
               <div class="fx-top">
-                <span v-if="tagMap.get(f.id) === 'awaiting'" class="tag awaiting">Awaiting result</span>
+                <span v-if="f.played" class="tag result" :class="`res-${resOf(f)}`">{{ scoreOf(f) }}</span>
+                <span v-else-if="tagMap.get(f.id) === 'awaiting'" class="tag awaiting">Awaiting result</span>
                 <span v-else-if="tagMap.get(f.id) === 'watch'" class="tag watch">Watch</span>
                 <span v-else-if="tagMap.get(f.id) === 'backup'" class="tag backup">Backup</span>
-                <span class="fx-time">{{ f.time || "Time TBD" }}</span>
+                <span class="fx-time">{{ f.time || (f.played ? "Played" : "Time TBD") }}</span>
               </div>
               <div class="fx-match">{{ matchupLabel(f) }}</div>
               <div class="fx-meta">
                 <router-link v-if="compSlug(f.comp)" class="fx-comp is-link"
                              :to="`/competition/${compSlug(f.comp)}`">{{ f.comp }} ↗</router-link>
                 <span v-else class="fx-comp">{{ f.comp }}</span>
-                <BcChip :comp="f.comp" />
+                <!-- Where to watch is spent information once the game is gone. -->
+                <BcChip v-if="!f.played" :comp="f.comp" />
               </div>
               <div v-if="displayReasons(f).length" class="reasons">{{ displayReasons(f).join(" · ") }}</div>
               <div v-if="f.notes" class="fx-note">“{{ f.notes }}”</div>
               <div class="fx-actions">
                 <button class="btn star" :class="{ on: f.mustWatch }" :aria-pressed="f.mustWatch"
-                        title="Toggle must-watch" @click="toggleStar(f.id)">{{ f.mustWatch ? "★" : "☆" }}</button>
+                        title="Toggle must-watch" @click="onStar(f)">{{ f.mustWatch ? "★" : "☆" }}</button>
                 <button class="btn check" :class="{ on: f.watched }" :aria-pressed="f.watched"
-                        title="Did you watch it?" @click="toggleWatched(f.id)">{{ f.watched ? "☑" : "☐" }} Watched</button>
+                        title="Did you watch it?" @click="onWatched(f)">{{ f.watched ? "☑" : "☐" }} Watched</button>
                 <button class="btn" title="Add a note" @click="openNotes(f)">✎ Note</button>
               </div>
               <form v-if="openNotesFor === f.id" class="notes-form" @submit.prevent="saveNote(f)">

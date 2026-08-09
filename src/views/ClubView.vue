@@ -56,7 +56,7 @@ const timeline = computed(() => {
   const rows = [];
   for (const m of (state.matches[props.id] || [])) {
     rows.push({
-      key: "m" + m.id, kind: "result", date: m.date, time: "", comp: m.comp,
+      key: "m" + m.id, kind: "result", date: m.date, time: m.time || "", comp: m.comp,
       label: matchupLabel({ clubId: props.id, opponent: m.opponent, venue: m.venue }),
       gf: m.gf, ga: m.ga, res: resultLetter(m.gf, m.ga),
       notes: m.notes, watched: m.watched,
