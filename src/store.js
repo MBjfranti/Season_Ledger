@@ -231,6 +231,19 @@ export const activeClubs = computed(() => CLUBS.filter(c => isFollowed(c.id)));
 export const activeFixtures = computed(() => state.fixtures.filter(f =>
   isFollowed(f.clubId) || (f.opponentId && isFollowed(f.opponentId))));
 
+// One logged match, shaped like a fixture. The clubId is which side you are
+// looking from: a club page wants its own view of a tie, scores and venue and
+// all, not whichever side the calendar happened to keep.
+export function matchAsFixture(clubId, m) {
+  return {
+    id: `m:${clubId}:${m.id}`, matchId: m.id, played: true,
+    clubId, opponent: m.opponent, opponentId: detectOpponentId(clubId, m.opponent),
+    venue: m.venue, comp: m.comp, date: m.date, time: m.time || "",
+    gf: m.gf, ga: m.ga,
+    mustWatch: !!m.mustWatch, watched: !!m.watched, notes: m.notes || "",
+  };
+}
+
 // Played matches, shaped like fixtures so the calendar can keep showing the day
 // after the score lands. A result moves the entry out of state.fixtures and into
 // state.matches; without this the day would simply empty itself and take its
@@ -241,13 +254,7 @@ export const playedFixtures = computed(() => {
     if (!isFollowed(clubId)) continue;
     for (const m of ms) {
       if (!m.date) continue;
-      rows.push({
-        id: `m:${clubId}:${m.id}`, matchId: m.id, played: true,
-        clubId, opponent: m.opponent, opponentId: detectOpponentId(clubId, m.opponent),
-        venue: m.venue, comp: m.comp, date: m.date, time: m.time || "",
-        gf: m.gf, ga: m.ga,
-        mustWatch: !!m.mustWatch, watched: !!m.watched, notes: m.notes || "",
-      });
+      rows.push(matchAsFixture(clubId, m));
     }
   }
   // A tie between two followed clubs is logged under both of them. Keep one

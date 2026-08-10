@@ -1,11 +1,13 @@
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { LEAGUES, CLUB_IMAGES, CLUB_SITES, STADIUMS, CLUB_COLORS } from "../data/data.js";
-import { state, recordFor, setPosition } from "../store.js";
-import { fmtDate, todayISO, timeSortKey, resultLetter, matchupLabel, getOrdinal, clubById } from "../utils.js";
+import { state, recordFor, setPosition, matchAsFixture } from "../store.js";
+import { fmtDate, fmtDayHead, todayISO, timeSortKey, resultLetter, matchupLabel,
+         getOrdinal, clubById } from "../utils.js";
 import BcChip from "../components/BcChip.vue";
 import ClubStrip from "../components/ClubStrip.vue";
 import FormChips from "../components/FormChips.vue";
+import FixtureCard from "../components/FixtureCard.vue";
 
 const props = defineProps({ id: { type: String, required: true } });
 
@@ -56,17 +58,17 @@ const timeline = computed(() => {
   const rows = [];
   for (const m of (state.matches[props.id] || [])) {
     rows.push({
-      key: "m" + m.id, kind: "result", date: m.date, time: m.time || "", comp: m.comp,
+      key: "m" + m.id, kind: "result", id: m.id, date: m.date, time: m.time || "", comp: m.comp,
       label: matchupLabel({ clubId: props.id, opponent: m.opponent, venue: m.venue }),
       gf: m.gf, ga: m.ga, res: resultLetter(m.gf, m.ga),
-      notes: m.notes, watched: m.watched,
+      notes: m.notes, watched: m.watched, mustWatch: m.mustWatch,
     });
   }
   for (const f of state.fixtures) {
     if (!f.date || (f.clubId !== props.id && f.opponentId !== props.id)) continue;
     rows.push({
-      key: "f" + f.id, kind: "fixture", date: f.date, time: f.time, comp: f.comp,
-      label: matchupLabel(f), notes: f.notes,
+      key: "f" + f.id, kind: "fixture", id: f.id, date: f.date, time: f.time, comp: f.comp,
+      label: matchupLabel(f), notes: f.notes, watched: f.watched, mustWatch: f.mustWatch,
     });
   }
   return rows.sort((a, b) =>
@@ -74,6 +76,27 @@ const timeline = computed(() => {
 });
 
 const played = computed(() => timeline.value.filter(r => r.kind === "result").length);
+
+/* ── Match drawer ──────────────────────────────────────────
+   The wall is a reading surface until you want to say something about a game.
+   A card opens the same drawer the calendar uses, so a star, a watched mark or
+   a note can be put on a match from whichever page you happened to be on.
+
+   The selection is held as a kind + id and resolved against live state on every
+   read: the card the drawer renders has to be the stored entry, not the flat
+   copy the wall was built from, or the buttons would write to a snapshot. */
+const selected = ref(null);
+
+const selectedEntry = computed(() => {
+  const sel = selected.value;
+  if (!sel) return null;
+  if (sel.kind === "fixture") return state.fixtures.find(f => f.id === sel.id) || null;
+  const m = (state.matches[props.id] || []).find(x => x.id === sel.id);
+  return m ? matchAsFixture(props.id, m) : null;
+});
+
+// Switching clubs mid-session must not leave another club's match open.
+watch(() => props.id, () => { selected.value = null; });
 
 // The card the wall opens on: the first fixture still to come.
 const nextIdx = computed(() => {
@@ -184,19 +207,22 @@ const bandSegs = computed(() => {
             <button class="btn" type="button" @click="scrollToNext">Next fixture ↓</button>
           </div>
           <div ref="wall" class="tl-wall">
-            <article v-for="(r, i) in timeline" :key="r.key" class="tl-card"
-                     :class="[r.kind === 'result' ? `is-result res-${r.res}` : 'is-fixture',
-                              { 'is-next': i === nextIdx }]">
+            <button v-for="(r, i) in timeline" :key="r.key" type="button" class="tl-card"
+                    :class="[r.kind === 'result' ? `is-result res-${r.res}` : 'is-fixture',
+                             { 'is-next': i === nextIdx,
+                               'is-picked': selected && selected.kind === r.kind && selected.id === r.id }]"
+                    :title="`Open ${r.label}`"
+                    @click="selected = { kind: r.kind, id: r.id }">
               <span v-if="i === nextIdx" class="tl-flag">Next</span>
               <div class="tl-when">{{ fmtDate(r.date) }}<template v-if="r.time"> · {{ r.time }}</template></div>
               <div class="tl-match">{{ r.label }}</div>
               <div v-if="r.kind === 'result'" class="tl-score" :class="`res-${r.res}`">{{ r.res }} {{ r.gf }}–{{ r.ga }}</div>
-              <div class="tl-comp">{{ r.comp }}</div>
+              <div class="tl-comp">{{ r.comp }}<span v-if="r.mustWatch" class="tl-star" title="Must-watch">★</span></div>
               <div v-if="r.notes || r.watched" class="tl-note">
                 <span v-if="r.watched" class="watched-mark">watched</span> {{ r.notes }}
               </div>
               <div v-if="r.kind === 'fixture'" class="tl-bc"><BcChip :comp="r.comp" /></div>
-            </article>
+            </button>
           </div>
         </template>
         <div v-else class="empty">Nothing on the ledger yet — fixtures arrive with the <router-link to="/calendar">calendar</router-link>, results with the periodic pulls.</div>
@@ -244,4 +270,19 @@ const bandSegs = computed(() => {
     </div>
   </template>
   </div>
+
+  <!-- Outside .sheet on purpose: the sheet is the scrolling surface, so a drawer
+       inside it would ride the scroll instead of standing over the page. -->
+  <template v-if="selectedEntry">
+    <div class="drawer-backdrop" @click="selected = null"></div>
+    <aside class="drawer" role="dialog" aria-label="Match details">
+      <header class="drawer-head">
+        <div class="drawer-title">{{ fmtDayHead(selectedEntry.date) }}</div>
+        <button class="btn drawer-close" @click="selected = null">Close ✕</button>
+      </header>
+      <div class="drawer-body">
+        <FixtureCard :fixture="selectedEntry" />
+      </div>
+    </aside>
+  </template>
 </template>

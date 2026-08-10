@@ -1,12 +1,10 @@
 <script setup>
-import { computed, ref, nextTick, watch } from "vue";
-import { state, toggleStar, toggleWatched, setFixtureNotes, addFixture,
-         toggleMatchStar, toggleMatchWatched, setMatchNotes,
-         activeClubs, activeFixtures, playedFixtures } from "../store.js";
+import { computed, ref, watch } from "vue";
+import { addFixture, activeClubs, activeFixtures, playedFixtures } from "../store.js";
 import { fmtDayHead, timeSortKey, addDaysISO, todayISO, fixtureScore,
-         fixtureReasons, matchupLabel, resultLetter, clubById } from "../utils.js";
-import BcChip from "../components/BcChip.vue";
-import { compAbbr, compSlug } from "../data/competitions.js";
+         matchupLabel, resultLetter, clubById } from "../utils.js";
+import FixtureCard from "../components/FixtureCard.vue";
+import { compAbbr } from "../data/competitions.js";
 
 /* ── Filters ───────────────────────────────────────────── */
 const clubFilter = ref(new Set());
@@ -78,22 +76,9 @@ const tagMap = computed(() => {
   return m;
 });
 
-function displayReasons(f) {
-  return fixtureReasons(f).filter(r => r !== "Marked must-watch");
-}
-
-/* ── Played matches ────────────────────────────────────────
-   Same cards, same buttons — the writes just go to the match log rather than to
-   the fixture list, since a played game lives on the other side of that line. */
+// The scoreline a played day wears in its month cell.
 const resOf = f => resultLetter(f.gf, f.ga);
 const scoreOf = f => `${resultLetter(f.gf, f.ga)} ${f.gf}–${f.ga}`;
-
-function onStar(f) {
-  f.played ? toggleMatchStar(f.clubId, f.matchId) : toggleStar(f.id);
-}
-function onWatched(f) {
-  f.played ? toggleMatchWatched(f.clubId, f.matchId) : toggleWatched(f.id);
-}
 
 /* ── Months + the selected month's matchdays ───────────── */
 const monthsList = computed(() => {
@@ -176,20 +161,6 @@ const drawerDensity = computed(() => {
 });
 
 function dnum(day) { return new Date(day + "T12:00:00").getDate(); }
-
-const openNotesFor = ref(null);
-const noteDraft = ref("");
-function openNotes(f) {
-  if (openNotesFor.value === f.id) { openNotesFor.value = null; return; }
-  openNotesFor.value = f.id;
-  noteDraft.value = f.notes || "";
-  nextTick(() => document.querySelector(".notes-form input")?.focus());
-}
-function saveNote(f) {
-  if (f.played) setMatchNotes(f.clubId, f.matchId, noteDraft.value);
-  else setFixtureNotes(f.id, noteDraft.value);
-  openNotesFor.value = null;
-}
 
 /* ── Add-fixture drawer ────────────────────────────────── */
 const showAdd = ref(false);
@@ -286,45 +257,8 @@ function submitFixture() {
           <button class="btn drawer-close" @click="selectedDay = null">Close ✕</button>
         </header>
         <div class="drawer-body" :class="drawerDensity">
-          <div v-for="f in selectedDayData.fixtures" :key="f.id" class="fx-card"
-               :class="{ 'is-watch': tagMap.get(f.id) === 'watch', 'is-watched': f.watched,
-                         'is-played': f.played }">
-            <div v-if="f.opponentId" class="kit-pair">
-              <span class="kit" :class="`kit-${f.clubId}`"></span><span class="kit" :class="`kit-${f.opponentId}`"></span>
-            </div>
-            <div v-else class="kit" :class="`kit-${f.clubId}`"></div>
-            <div class="fx-body">
-              <div class="fx-top">
-                <span v-if="f.played" class="tag result" :class="`res-${resOf(f)}`">{{ scoreOf(f) }}</span>
-                <span v-else-if="tagMap.get(f.id) === 'awaiting'" class="tag awaiting">Awaiting result</span>
-                <span v-else-if="tagMap.get(f.id) === 'watch'" class="tag watch">Watch</span>
-                <span v-else-if="tagMap.get(f.id) === 'backup'" class="tag backup">Backup</span>
-                <span class="fx-time">{{ f.time || (f.played ? "Played" : "Time TBD") }}</span>
-              </div>
-              <div class="fx-match">{{ matchupLabel(f) }}</div>
-              <div class="fx-meta">
-                <router-link v-if="compSlug(f.comp)" class="fx-comp is-link"
-                             :to="`/competition/${compSlug(f.comp)}`">{{ f.comp }} ↗</router-link>
-                <span v-else class="fx-comp">{{ f.comp }}</span>
-                <!-- Where to watch is spent information once the game is gone. -->
-                <BcChip v-if="!f.played" :comp="f.comp" />
-              </div>
-              <div v-if="displayReasons(f).length" class="reasons">{{ displayReasons(f).join(" · ") }}</div>
-              <div v-if="f.notes" class="fx-note">“{{ f.notes }}”</div>
-              <div class="fx-actions">
-                <button class="btn star" :class="{ on: f.mustWatch }" :aria-pressed="f.mustWatch"
-                        title="Toggle must-watch" @click="onStar(f)">{{ f.mustWatch ? "★" : "☆" }}</button>
-                <button class="btn check" :class="{ on: f.watched }" :aria-pressed="f.watched"
-                        title="Did you watch it?" @click="onWatched(f)">{{ f.watched ? "☑" : "☐" }} Watched</button>
-                <button class="btn" title="Add a note" @click="openNotes(f)">✎ Note</button>
-              </div>
-              <form v-if="openNotesFor === f.id" class="notes-form" @submit.prevent="saveNote(f)">
-                <input v-model="noteDraft" placeholder="Your notes on this one">
-                <button class="btn primary" type="submit">Save note</button>
-                <button class="btn" type="button" @click="openNotesFor = null">Cancel</button>
-              </form>
-            </div>
-          </div>
+          <FixtureCard v-for="f in selectedDayData.fixtures" :key="f.id"
+                       :fixture="f" :tag="tagMap.get(f.id)" />
         </div>
       </aside>
     </template>
