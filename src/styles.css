@@ -806,9 +806,8 @@ details.preview .prose { padding: 4px 22px 22px; }
 .tag.watch { background: var(--win-fill); color: var(--on-win); }
 .tag.backup { background: var(--draw-soft); color: var(--draw); border: 1px solid var(--draw-line); }
 .tag.awaiting { background: transparent; color: var(--text-3); border: 1px dashed var(--text-3); }
-/* The score a played match wears in place of its Watch/Backup pick. The result
-   letter carries the colour, so the scoreline reads at a glance in a stack. */
-.tag.result { font-family: var(--data); letter-spacing: 0.04em; }
+/* What a played match wears in place of its Watch/Backup pick — the scoreline
+   itself sits up in the match line, so this only has to say how it went. */
 .tag.result.res-W { background: var(--win-soft); color: var(--win); border: 1px solid var(--win-line); }
 .tag.result.res-D { background: var(--draw-soft); color: var(--draw); border: 1px solid var(--draw-line); }
 .tag.result.res-L { background: var(--loss-soft); color: var(--loss); border: 1px solid var(--loss-line); }
@@ -927,6 +926,14 @@ details.preview .prose { padding: 4px 22px 22px; }
   text-transform: uppercase; letter-spacing: 0.01em;
   line-height: 1.06;
 }
+/* A finished match reads as a scoreboard — the two names either side of the
+   goals, which carry the result's colour so W/D/L lands before you read it. */
+.fx-match.is-score { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 9px; }
+.fx-goals { font-family: var(--data); font-weight: var(--fw-ui); white-space: nowrap; }
+.fx-goals.res-W { color: var(--win); }
+.fx-goals.res-D { color: var(--draw); }
+.fx-goals.res-L { color: var(--loss); }
+
 .fx-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .fx-comp { font-size: var(--fs-sm); color: var(--text-3); }
 .reasons { font-size: var(--fs-sm); color: var(--text-2); font-style: italic; }
@@ -1703,10 +1710,15 @@ body::before {
 .cell-foot .kit { width: 16px; height: 7px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--kit-edge); }
 .dc-more { font-size: var(--fs-xs); color: var(--text-3); }
 
-/* Drawer — a door swinging open onto the day */
-.drawer-backdrop { position: absolute; inset: 0; z-index: 40; background: rgba(28,18,8,0.30); }
+/* Drawer — a door swinging open onto the day.
+
+   Fixed to the viewport, not to the 1200px column the rest of the app lives in:
+   a panel that stopped at the content edge left a strip of pitch to its right
+   and read as a floating card rather than something the window opened. That
+   puts it over the masthead too, so it clears the z-index the masthead holds. */
+.drawer-backdrop { position: fixed; inset: 0; z-index: 80; background: rgba(28,18,8,0.30); }
 .drawer {
-  position: absolute; top: 0; right: 0; height: 100%; width: min(430px, 88%); z-index: 50;
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(430px, 88%); z-index: 90;
   background: var(--bg-raised); border-left: 1px solid var(--panel-edge); box-shadow: var(--shadow-lg);
   display: flex; flex-direction: column;
 }

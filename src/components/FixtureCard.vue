@@ -2,10 +2,10 @@
 // One match in a drawer — fixture or result, with the annotations you can put
 // on it. Shared by the calendar's day drawer and the club page's season wall so
 // a game offers the same three buttons wherever you reach it from.
-import { ref, nextTick } from "vue";
+import { computed, ref, nextTick } from "vue";
 import { toggleStar, toggleWatched, setFixtureNotes,
          toggleMatchStar, toggleMatchWatched, setMatchNotes } from "../store.js";
-import { fixtureReasons, matchupLabel, resultLetter } from "../utils.js";
+import { fixtureReasons, matchupLabel, resultLetter, scoreParts } from "../utils.js";
 import { compSlug } from "../data/competitions.js";
 import BcChip from "./BcChip.vue";
 
@@ -17,7 +17,8 @@ const props = defineProps({
 });
 
 const resOf = x => resultLetter(x.gf, x.ga);
-const scoreOf = x => `${resultLetter(x.gf, x.ga)} ${x.gf}–${x.ga}`;
+const RESULT_WORD = { W: "Won", D: "Drawn", L: "Lost" };
+const score = computed(() => scoreParts(props.fixture));
 
 // The star sitting directly below says this already.
 const displayReasons = x => fixtureReasons(x).filter(r => r !== "Marked must-watch");
@@ -62,13 +63,22 @@ function saveNote() {
     <div v-else class="kit" :class="`kit-${fixture.clubId}`"></div>
     <div class="fx-body">
       <div class="fx-top">
-        <span v-if="fixture.played" class="tag result" :class="`res-${resOf(fixture)}`">{{ scoreOf(fixture) }}</span>
+        <span v-if="fixture.played" class="tag result" :class="`res-${resOf(fixture)}`">
+          Full time · {{ RESULT_WORD[resOf(fixture)] }}
+        </span>
         <span v-else-if="tag === 'awaiting'" class="tag awaiting">Awaiting result</span>
         <span v-else-if="tag === 'watch'" class="tag watch">Watch</span>
         <span v-else-if="tag === 'backup'" class="tag backup">Backup</span>
-        <span class="fx-time">{{ fixture.time || (fixture.played ? "Played" : "Time TBD") }}</span>
+        <span v-if="fixture.time || !fixture.played" class="fx-time">{{ fixture.time || "Time TBD" }}</span>
       </div>
-      <div class="fx-match">{{ matchupLabel(fixture) }}</div>
+      <!-- Finished: the goals sit between the two names, the way a scoreboard
+           puts them, rather than hiding in a corner tag. -->
+      <div v-if="fixture.played" class="fx-match is-score">
+        <span class="fx-side">{{ score.home }}</span>
+        <span class="fx-goals" :class="`res-${resOf(fixture)}`">{{ score.hg }}–{{ score.ag }}</span>
+        <span class="fx-side">{{ score.away }}</span>
+      </div>
+      <div v-else class="fx-match">{{ matchupLabel(fixture) }}</div>
       <div class="fx-meta">
         <router-link v-if="compSlug(fixture.comp)" class="fx-comp is-link"
                      :to="`/competition/${compSlug(fixture.comp)}`">{{ fixture.comp }} ↗</router-link>

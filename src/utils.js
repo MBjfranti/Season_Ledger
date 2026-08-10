@@ -143,3 +143,13 @@ export function matchupLabel(f) {
   if (f.venue === "A") return `${f.opponent} v ${club.short}`;
   return `${club.short} v ${f.opponent}`;
 }
+
+// A finished match as it reads on a scoreboard. gf/ga are stored from the
+// club's side, so they are put back in the order matchupLabel names the two —
+// away fixtures list the opponent first, and their goals have to follow.
+export function scoreParts(f) {
+  const club = clubById(f.clubId);
+  return f.venue === "A"
+    ? { home: f.opponent, away: club.short, hg: f.ga, ag: f.gf }
+    : { home: club.short, away: f.opponent, hg: f.gf, ag: f.ga };
+}
