@@ -5,7 +5,7 @@ import { reactive, watch, computed } from "vue";
 import { CLUBS } from "./data/data.js";
 import { SEED_FIXTURES, MOVED_FIXTURES } from "./data/fixtures.js";
 import { RESULTS } from "./data/results.js";
-import { uid, clubById, detectOpponentId, setFollowedCheck } from "./utils.js";
+import { uid, clubById, detectOpponentId, setFollowedCheck, todayISO } from "./utils.js";
 import { fetchSeason } from "./data/espn.js";
 
 // The 2026–27 window the API is queried over.
@@ -21,6 +21,7 @@ function defaultState() {
     fixtures: [],   // filled from SEED_FIXTURES by mergeSeedFixtures()
     removed: [],    // "clubId|date" keys of fixtures removed in older versions
     clubPrefs: {},  // clubId -> true/false, only for clubs explicitly toggled
+    hiddenComps: [], // competition names kept off the calendar
     apiSyncedAt: null, // ISO timestamp of the last successful ESPN sync
   };
 }
@@ -35,6 +36,7 @@ function loadState() {
     if (!s.fixtures) s.fixtures = [];
     if (!s.removed) s.removed = [];
     if (!s.clubPrefs) s.clubPrefs = {};
+    if (!s.hiddenComps) s.hiddenComps = [];
     return s;
   } catch (e) {
     return defaultState();
@@ -200,6 +202,21 @@ function applyFixtureResult(f, gf, ga) {
   state.fixtures = state.fixtures.filter(x => x.id !== f.id);
 }
 
+// A match cannot have been played tomorrow. An early version of the API matcher
+// gave August 8 friendly scores to fixtures a week out, and those bogus results
+// are already sitting in saved state where no code change reaches them — so drop
+// any result dated in the future and let the seed and the next sync put the
+// fixture back. Results dated today are left alone; the sync unlogs those (see
+// applyApiRecords) once ESPN says the match has not kicked off.
+function dropFutureResults() {
+  const today = todayISO();
+  for (const [clubId, ms] of Object.entries(state.matches)) {
+    const kept = ms.filter(m => m.date <= today);
+    if (kept.length !== ms.length) state.matches[clubId] = kept;
+  }
+}
+
+dropFutureResults();
 mergeSeedFixtures();
 mergeResults();
 
@@ -223,6 +240,24 @@ export function toggleClub(clubId) {
 
 // Let the pure helpers score "both your clubs" against real follow state.
 setFollowedCheck(isFollowed);
+
+/* ── Hidden competitions ───────────────────────────────────
+   Following a club means taking its whole calendar, friendlies and early cup
+   rounds included. Hiding is the lighter tool: the competition stays followed
+   and keeps its own page, it just stops crowding the calendar. Kept as the list
+   of exceptions, so a competition added later shows up by default. */
+
+export const isCompHidden = name => state.hiddenComps.includes(name);
+
+export function toggleCompHidden(name) {
+  const i = state.hiddenComps.indexOf(name);
+  if (i < 0) state.hiddenComps.push(name);
+  else state.hiddenComps.splice(i, 1);
+}
+
+export function showAllComps() {
+  state.hiddenComps = [];
+}
 
 export const activeClubs = computed(() => CLUBS.filter(c => isFollowed(c.id)));
 
@@ -373,9 +408,26 @@ export function applyApiRecords(records) {
     for (const m of ms) logged.add(cid + "|" + m.date);
   }
   const claimed = new Set();
-  const stats = { added: 0, updated: 0, results: 0, skipped: 0 };
+  const stats = { added: 0, updated: 0, results: 0, skipped: 0, unlogged: 0 };
+
+  // A result logged for a match ESPN still has as scheduled was mis-filed. Drop
+  // it — including the mirror copy under the other club — so the record below
+  // can put the fixture back where the result was standing.
+  const unlog = (clubId, date) => {
+    const ms = clubId && state.matches[clubId];
+    if (!ms) return;
+    const kept = ms.filter(m => m.date !== date);
+    if (kept.length === ms.length) return;
+    state.matches[clubId] = kept;
+    logged.delete(clubId + "|" + date);
+    stats.unlogged++;
+  };
 
   for (const rec of records) {
+    if (!rec.completed) {
+      unlog(rec.clubId, rec.date);
+      unlog(rec.opponentId, rec.date);
+    }
     const existing = findStored(rec, claimed);
     if (existing) claimed.add(existing.id);
     // Say it the way the stored fixture's owner would; scores flip with it.
@@ -432,7 +484,8 @@ export async function syncFromApi({ from, to } = {}) {
     const stats = applyApiRecords(records);
     syncState.message =
       `${records.length} matches across ${comps} competitions · ` +
-      `${stats.added} new, ${stats.updated} updated, ${stats.results} results`;
+      `${stats.added} new, ${stats.updated} updated, ${stats.results} results` +
+      (stats.unlogged ? `, ${stats.unlogged} mis-filed result${stats.unlogged === 1 ? "" : "s"} cleared` : "");
     if (errors.length) syncState.error = errors.join("; ");
     return stats;
   } catch (e) {

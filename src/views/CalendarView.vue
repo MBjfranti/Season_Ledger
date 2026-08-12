@@ -1,20 +1,34 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import { addFixture, activeClubs, activeFixtures, playedFixtures } from "../store.js";
+import { addFixture, activeClubs, activeFixtures, playedFixtures,
+         isCompHidden, toggleCompHidden, showAllComps } from "../store.js";
 import { fmtDayHead, timeSortKey, addDaysISO, todayISO, fixtureScore,
          matchupLabel, resultLetter, clubById } from "../utils.js";
 import FixtureCard from "../components/FixtureCard.vue";
-import { compAbbr, compSlug } from "../data/competitions.js";
+import { COMPETITIONS, compAbbr, compSlug } from "../data/competitions.js";
 
-/* ── Filters ───────────────────────────────────────────── */
+/* ── Filters ───────────────────────────────────────────────
+   Clubs narrow to a selection; competitions work the other way round — every
+   one is on the calendar until you hide it, because "everything except the
+   friendlies" is the thing you actually want and picking one competition at a
+   time could never say it. Hidden competitions are remembered between visits. */
 const clubFilter = ref(new Set());
-const compFilter = ref("");
+const showCompMenu = ref(false);
 
+// Listed in the order competitions.js keeps them — leagues with their own cups,
+// country by country, then Europe — rather than the order the clubs happen to
+// mention them in.
+const COMP_ORDER = Object.keys(COMPETITIONS);
 const allComps = computed(() => {
   const seen = new Set();
   for (const c of activeClubs.value) for (const comp of c.comps) seen.add(comp);
-  return [...seen];
+  return [...seen].sort((a, b) => COMP_ORDER.indexOf(a) - COMP_ORDER.indexOf(b));
 });
+
+// Only competitions the followed clubs actually play count as hidden — a stale
+// name left over from an unfollowed club should not show up in the count.
+const hiddenComps = computed(() => allComps.value.filter(isCompHidden));
+const visibleComps = computed(() => allComps.value.filter(c => !isCompHidden(c)));
 
 function toggleClubFilter(id) {
   const next = new Set(clubFilter.value);
@@ -23,18 +37,18 @@ function toggleClubFilter(id) {
 }
 
 const filtersActive = computed(() =>
-  clubFilter.value.size > 0 || compFilter.value !== "");
+  clubFilter.value.size > 0 || hiddenComps.value.length > 0);
 
 function clearFilters() {
   clubFilter.value = new Set();
-  compFilter.value = "";
+  showAllComps();
 }
 
 function passesFilters(f) {
   if (clubFilter.value.size &&
       !clubFilter.value.has(f.clubId) &&
       !(f.opponentId && clubFilter.value.has(f.opponentId))) return false;
-  if (compFilter.value && f.comp !== compFilter.value) return false;
+  if (isCompHidden(f.comp)) return false;
   return true;
 }
 
@@ -198,14 +212,27 @@ function submitFixture() {
               @click="toggleClubFilter(c.id)">
         <span class="kit" :class="`kit-${c.id}`"></span><span class="fc-label">{{ c.short }}</span>
       </button>
-      <select v-model="compFilter" class="filter-select" aria-label="Filter by competition">
-        <option value="">All competitions</option>
-        <option v-for="comp in allComps" :key="comp" :value="comp">{{ comp }}</option>
-      </select>
-      <!-- Filtering to one competition is usually the moment you want to read
-           about it, so the way through sits right next to the filter. -->
-      <router-link v-if="compFilter && compSlug(compFilter)" class="btn comp-open"
-                   :to="`/competition/${compSlug(compFilter)}`">{{ compAbbr(compFilter) }} page ↗</router-link>
+      <!-- Competitions are hidden, not selected — see the note above passesFilters.
+           Each row also carries the way through to that competition's page. -->
+      <div class="comp-menu">
+        <button class="btn comp-menu-btn" type="button" :aria-expanded="showCompMenu"
+                @click="showCompMenu = !showCompMenu">
+          Competitions<template v-if="hiddenComps.length"> · {{ hiddenComps.length }} hidden</template> ▾
+        </button>
+        <div v-if="showCompMenu" class="comp-pop">
+          <div class="cm-head">
+            <span>Show on the calendar</span>
+            <button v-if="hiddenComps.length" class="btn cm-all" type="button" @click="showAllComps()">Show all</button>
+          </div>
+          <label v-for="comp in allComps" :key="comp" class="cm-row">
+            <input type="checkbox" :checked="!isCompHidden(comp)" @change="toggleCompHidden(comp)">
+            <span class="cm-name">{{ comp }}</span>
+            <router-link v-if="compSlug(comp)" class="cm-link" :to="`/competition/${compSlug(comp)}`"
+                         title="Open this competition's page" @click.stop>↗</router-link>
+          </label>
+          <div v-if="!visibleComps.length" class="cm-warn">Everything is hidden — the calendar will be empty.</div>
+        </div>
+      </div>
       <button v-if="filtersActive" class="btn" @click="clearFilters">Clear</button>
       <span class="cal-spacer"></span>
       <button class="btn" @click="showAdd = true">＋ Add fixture</button>
