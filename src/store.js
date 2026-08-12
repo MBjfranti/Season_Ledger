@@ -275,26 +275,54 @@ export const playedFixtures = computed(() => {
 const DAY = 86400e3;
 const pairKey = (a, b) => [a, b].filter(Boolean).sort().join("~");
 
+// Opponent names come from two hands: ours in fixtures.js and ESPN's in the API,
+// and they rarely agree exactly ("Stade Rennais" / "Rennes", "AJ Auxerre" /
+// "Auxerre"). Strip the decoration and see whether one still contains the other.
+const NOISE = /\b(fc|cf|ac|as|sc|sv|rc|afc|club|de|la|el|los|the|united|city|calcio)\b/g;
+const normName = s => (s || "").toLowerCase()
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")  // Barca, Depor
+  .replace(/[^a-z ]/g, " ").replace(NOISE, " ").replace(/\s+/g, " ").trim();
+
+// Is this record even about the stored fixture's club? A tracked-club matchup is
+// stored once under whichever side is home, so compare the unordered pair — but
+// accept a half match too, since only one of the two entries knows about the
+// other when a club is unfollowed and so absent from the sync.
+function samePairing(f, rec) {
+  if (pairKey(f.clubId, f.opponentId) === pairKey(rec.clubId, rec.opponentId)) return true;
+  return f.clubId === rec.clubId || f.opponentId === rec.clubId;
+}
+
+// …and does the opponent agree, so a moved date is still recognisably this match?
+function sameOpponent(f, rec) {
+  if (f.opponentId && rec.opponentId) {
+    return pairKey(f.clubId, f.opponentId) === pairKey(rec.clubId, rec.opponentId);
+  }
+  const a = normName(f.opponent), b = normName(rec.opponent);
+  if (!a || !b) return false;
+  return a === b || a.includes(b) || b.includes(a);
+}
+
 // Find the stored fixture an API record refers to. Matching by ESPN event id is
 // exact; the fallbacks exist so the FIRST sync adopts the hand-seeded fixtures
 // (which carry no event id) instead of duplicating every one of them — including
 // the case where a TV pick has since moved the date out from under them.
+//
+// The wide date window is only safe once the opponent agrees as well. Clubs play
+// weekly in a league, so club+comp alone used to be enough; in a friendly they
+// play every third day, and club+comp within ten days handed Brighton's August 8
+// score to their August 15 fixture. A record whose opponent does not match can
+// still adopt a fixture on the same day — that is a spelling difference, not a
+// different match — but nothing further out.
 function findStored(rec, claimed) {
   if (rec.eid) {
     const byId = state.fixtures.find(f => f.eid === rec.eid);
     if (byId) return byId;
   }
+  const gap = f => Math.abs(new Date(f.date) - new Date(rec.date));
   const candidates = state.fixtures.filter(f =>
-    !f.eid && !claimed.has(f.id) && f.comp === rec.comp &&
-    Math.abs(new Date(f.date) - new Date(rec.date)) <= 10 * DAY &&
-    (rec.opponentId
-      // A tracked-club matchup is stored once under whichever side is home, so
-      // compare the unordered pair rather than assuming who owns the entry.
-      ? pairKey(f.clubId, f.opponentId) === pairKey(rec.clubId, rec.opponentId)
-      : f.clubId === rec.clubId));
-  return candidates.sort((a, b) =>
-    Math.abs(new Date(a.date) - new Date(rec.date)) -
-    Math.abs(new Date(b.date) - new Date(rec.date)))[0];
+    !f.eid && !claimed.has(f.id) && f.comp === rec.comp && samePairing(f, rec) &&
+    gap(f) <= (sameOpponent(f, rec) ? 10 * DAY : DAY));
+  return candidates.sort((a, b) => gap(a) - gap(b))[0];
 }
 
 // An API record describes the match from the side ESPN's event matched on. A

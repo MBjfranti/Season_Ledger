@@ -6,6 +6,7 @@ import DashboardView from "./views/DashboardView.vue";
 import CalendarView from "./views/CalendarView.vue";
 import ClubView from "./views/ClubView.vue";
 import CompetitionView from "./views/CompetitionView.vue";
+import CompetitionsView from "./views/CompetitionsView.vue";
 import "./styles.css";
 
 const router = createRouter({
@@ -17,6 +18,7 @@ const router = createRouter({
     { path: "/", component: DashboardView },
     { path: "/calendar", component: CalendarView },
     { path: "/club/:id", component: ClubView, props: true },
+    { path: "/competitions", component: CompetitionsView },
     { path: "/competition/:slug", component: CompetitionView, props: true },
   ],
 });

@@ -4,7 +4,7 @@ import { addFixture, activeClubs, activeFixtures, playedFixtures } from "../stor
 import { fmtDayHead, timeSortKey, addDaysISO, todayISO, fixtureScore,
          matchupLabel, resultLetter, clubById } from "../utils.js";
 import FixtureCard from "../components/FixtureCard.vue";
-import { compAbbr } from "../data/competitions.js";
+import { compAbbr, compSlug } from "../data/competitions.js";
 
 /* ── Filters ───────────────────────────────────────────── */
 const clubFilter = ref(new Set());
@@ -202,6 +202,10 @@ function submitFixture() {
         <option value="">All competitions</option>
         <option v-for="comp in allComps" :key="comp" :value="comp">{{ comp }}</option>
       </select>
+      <!-- Filtering to one competition is usually the moment you want to read
+           about it, so the way through sits right next to the filter. -->
+      <router-link v-if="compFilter && compSlug(compFilter)" class="btn comp-open"
+                   :to="`/competition/${compSlug(compFilter)}`">{{ compAbbr(compFilter) }} page ↗</router-link>
       <button v-if="filtersActive" class="btn" @click="clearFilters">Clear</button>
       <span class="cal-spacer"></span>
       <button class="btn" @click="showAdd = true">＋ Add fixture</button>

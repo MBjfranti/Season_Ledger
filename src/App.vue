@@ -54,6 +54,7 @@ const lastSync = computed(() => {
         <div class="seg">
           <router-link class="seg-item" to="/">Ledger</router-link>
           <router-link class="seg-item" to="/calendar">Calendar</router-link>
+          <router-link class="seg-item" to="/competitions">Competitions</router-link>
         </div>
         <div class="atmos">
           <button class="btn atmos-btn" type="button" :aria-expanded="showSettings"

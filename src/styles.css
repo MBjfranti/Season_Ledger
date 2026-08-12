@@ -1311,6 +1311,73 @@ h3.mini-day-head { margin: 0 0 2px; }
 @media (max-width: 900px) { .comp-cols { grid-template-columns: 1fr; } }
 .comp-prose p { margin: 0 0 12px; }
 
+/* ── Competition navigation ──
+   The strip is the club strip's sibling: one hop between competitions. */
+.comp-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.comp-strip a {
+  text-decoration: none;
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--r-ctrl);
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+  padding: 5px 12px 6px;
+  font-family: var(--display); font-weight: 600; font-size: var(--fs-md);
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-2);
+  transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
+}
+.comp-strip a:hover { background: var(--panel-hover); transform: translateY(-1px); }
+/* Same "you are here" mark the club strip and filter chips use. */
+.comp-strip a.active {
+  border-color: var(--accent); color: var(--text);
+  box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--accent);
+}
+
+/* Index of competitions — the same door idea as the club grid. */
+.comp-grid {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+}
+.comp-door {
+  display: block; text-decoration: none; color: inherit;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--panel-edge); border-radius: var(--r-card);
+  background: var(--panel); box-shadow: var(--shadow-sm);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.comp-door:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--accent); }
+.comp-door h3 { font-size: var(--fs-lg); line-height: 1.15; margin: 0 0 2px; }
+.cd-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.cd-abbr {
+  font-family: var(--sans); font-size: var(--fs-2xs); font-weight: var(--fw-ui);
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3);
+}
+.cd-kits { display: inline-flex; flex-wrap: wrap; gap: 3px; justify-content: flex-end; }
+.cd-kits .kit { width: 14px; height: 8px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--kit-edge); }
+.cd-meta { font-size: var(--fs-xs); color: var(--text-3); margin-bottom: 8px; }
+.cd-next { font-size: var(--fs-sm); color: var(--text-2); margin-bottom: 10px; min-height: 2.4em; }
+.cd-when { font-family: var(--data); font-size: var(--fs-xs); color: var(--text-3); margin-right: 6px; }
+/* Bundesliga carries three services — they wrap rather than run off the card. */
+.cd-bc { display: flex; flex-wrap: wrap; gap: 5px; }
+
+/* A club's competitions, linked, under its stat row. */
+.comp-links { display: flex; flex-wrap: wrap; gap: 7px; margin: -6px 0 18px; }
+.comp-link {
+  text-decoration: none; font-size: var(--fs-xs); color: var(--text-2);
+  padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--panel-edge); background: var(--panel);
+}
+.comp-link:hover { border-color: var(--accent); color: var(--text); }
+.comp-open { text-decoration: none; }
+
+/* Each block carries its own cream panel — the page is read against the pitch,
+   and the label already flips to ink inside a .band-wrap. */
+.comp-block { margin-bottom: 16px; }
+.comp-block:last-child { margin-bottom: 0; }
+.comp-block > .section-label { margin: 0 0 14px; }
+.comp-block .empty { border: none; padding: 4px 0; text-align: left; background: none; }
+.comp-block .comp-list li:last-child,
+.comp-block .comp-facts > div:last-child { border-bottom: none; padding-bottom: 0; }
+
 .comp-list { list-style: none; margin: 0 0 8px; padding: 0; }
 .comp-list li {
   display: flex; align-items: baseline; gap: 10px;

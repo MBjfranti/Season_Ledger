@@ -4,6 +4,7 @@ import { LEAGUES, CLUB_IMAGES, CLUB_SITES, STADIUMS, CLUB_COLORS } from "../data
 import { state, recordFor, setPosition, matchAsFixture } from "../store.js";
 import { fmtDate, fmtDayHead, todayISO, timeSortKey, resultLetter, matchupLabel,
          getOrdinal, clubById } from "../utils.js";
+import { compSlug } from "../data/competitions.js";
 import BcChip from "../components/BcChip.vue";
 import ClubStrip from "../components/ClubStrip.vue";
 import FormChips from "../components/FormChips.vue";
@@ -35,6 +36,9 @@ const images = computed(() => CLUB_IMAGES[props.id]);
 const stadium = computed(() => STADIUMS[props.id]);
 const site = computed(() => CLUB_SITES[props.id]);
 const record = computed(() => recordFor(props.id));
+// The competitions this club contests, as links out to each one's page.
+const compLinks = computed(() => (club.value.comps || [])
+  .map(name => ({ name, slug: compSlug(name) })).filter(c => c.slug));
 const pos = computed(() => state.positions[props.id]);
 
 // Clubs without a stadium photo wash the banner in their kit colour instead of
@@ -188,6 +192,13 @@ const bandSegs = computed(() => {
           <div class="stat"><div class="num">{{ record.gf }}:{{ record.ga }}</div><div class="lbl">Goals</div></div>
           <div class="stat"><div class="num"><FormChips :form="record.form" /></div><div class="lbl">Form (last 5)</div></div>
         </div>
+
+        <!-- Where this club's season is played out — and the way through to
+             each competition's own page. -->
+        <nav class="comp-links" aria-label="Competitions this club is in">
+          <router-link v-for="c in compLinks" :key="c.slug" class="comp-link"
+                       :to="`/competition/${c.slug}`">{{ c.name }}</router-link>
+        </nav>
 
         <template v-if="club.preview && club.preview.length">
           <h2 class="section-label">
