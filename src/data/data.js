@@ -40,6 +40,10 @@ export const BROADCAST = {
   "UEFA Europa League":      [{ svc: "Paramount+", brand: "paramount" }],
   "UEFA Champions League":   [{ svc: "Paramount+", brand: "paramount" },
                               { svc: "TUDN", brand: "tudn", note: "Esp." }],
+  "UEFA Super Cup":          [{ svc: "Paramount+", brand: "paramount" },
+                              { svc: "CBS Sports Network", brand: "paramount" },
+                              { svc: "TUDN", brand: "tudn", note: "Esp." }],
+  "Trophée des Champions":   [{ svc: "beIN Sports · Esp.", brand: "bein" }],
 };
 
 // Derby / rivalry opponents per club (matched by substring, case-insensitive).
@@ -433,7 +437,8 @@ export const CLUBS = [
     matchAs: ["Paris Saint-Germain", "PSG"],
     league: "ligue1",
     leagueComp: "Ligue 1",
-    comps: ["Ligue 1", "Coupe de France", "UEFA Champions League"],
+    comps: ["Ligue 1", "Coupe de France", "UEFA Champions League",
+            "UEFA Super Cup", "Trophée des Champions"],
     manager: "Luis Enrique",
     espnId: "160",
     forecast: { low: 1, high: 2, extra: "Ligue 1 is the floor; the season is judged in Europe." },

@@ -554,6 +554,15 @@ const CUP_FIXTURES = [
   // that draw is Fri 2026-08-28, same day as Rennes'/Milan's Europa League draw.
   { clubId: "brighton", opponent: "CFR Cluj or Tromsø", venue: "A", comp: "UEFA Conference League", date: "2026-08-20" },
   { clubId: "brighton", opponent: "CFR Cluj or Tromsø", venue: "H", comp: "UEFA Conference League", date: "2026-08-27" },
+  // PSG's two August finals. Neither sits in a league or European slug, so they
+  // were invisible until "UEFA Super Cup"/"Trophée des Champions" were added to
+  // COMP_SLUGS and to psg.comps.
+  { clubId: "psg", opponent: "Aston Villa", venue: "N", comp: "UEFA Super Cup", date: "2026-08-12", time: "2:00 PM CT" },        // Stadion Salzburg, 21:00 CEST
+  { clubId: "psg", opponent: "Lens", venue: "A", comp: "Trophée des Champions", date: "2026-08-16", time: "1:45 PM CT" },        // Stade Bollaert-Delelis, 20:45 CEST
+  // EFL Cup R2 (drawn after the Aug 7–8 first round; Wrexham lost at Middlesbrough).
+  // Ties are pencilled in for the week of Aug 25 — kickoff times not yet set.
+  { clubId: "lincoln", opponent: "Blackpool", venue: "A", comp: "EFL Cup", date: "2026-08-25" },
+  { clubId: "westbrom", opponent: "Newcastle United", venue: "A", comp: "EFL Cup", date: "2026-08-25" },
 ];
 
 // Fixtures whose released date later moved (TV picks etc.). The app deletes the

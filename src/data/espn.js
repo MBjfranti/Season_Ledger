@@ -35,6 +35,10 @@ export const COMP_SLUGS = {
   "UEFA Champions League": "uefa.champions",
   "UEFA Europa League": "uefa.europa",
   "UEFA Conference League": "uefa.europa.conf",
+  // Super cups live on their own slugs — a club's league/European slugs do NOT
+  // carry them, which is why PSG's Aug 12 and Aug 16 finals were missing.
+  "UEFA Super Cup": "uefa.super_cup",
+  "Trophée des Champions": "fra.super_cup",
 };
 
 const SLUG_COMPS = Object.fromEntries(
@@ -47,6 +51,11 @@ const fmtTime = new Intl.DateTimeFormat("en-US", {
 const fmtDate = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit",
 });
+
+// Competitions played at a neutral ground by definition. ESPN files the Super
+// Cup with a nominal home side and no neutralSite flag, which would otherwise
+// have PSG "hosting" Aston Villa in Salzburg.
+const NEUTRAL_COMPS = new Set(["UEFA Super Cup"]);
 
 const compact = d => d.replaceAll("-", "");
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -104,7 +113,7 @@ function normalize(ev, comp, byEspnId) {
     // Use the tracked club's own name for a tracked opponent: ESPN's spelling
     // ("Deportivo La Coruña") does not always match what the app calls them.
     opponent: other ? other.name : theirs.team.displayName,
-    venue: c.neutralSite ? "N" : (mineIsHome ? "H" : "A"),
+    venue: (c.neutralSite || NEUTRAL_COMPS.has(comp)) ? "N" : (mineIsHome ? "H" : "A"),
     comp,
     date: fmtDate.format(kickoff),
     time: c.timeValid !== false ? `${fmtTime.format(kickoff)} CT` : "",

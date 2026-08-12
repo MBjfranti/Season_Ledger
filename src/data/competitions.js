@@ -143,6 +143,24 @@ export const COMPETITIONS = {
       "The winner qualifies for the following season's Europa League. Entry for most qualified clubs is through a two-legged play-off round in late August.",
     ],
   },
+  "UEFA Super Cup": {
+    slug: "uefa-super-cup", abbr: "Super Cup", country: "Europe", tier: "Continental",
+    teams: 2, format: "Single match at a neutral venue; level after 90 minutes goes straight to penalties",
+    blurb: [
+      "One match between the reigning Champions League and Europa League holders, played in mid-August at a neutral ground chosen years in advance. The 2026 edition is at Stadion Salzburg.",
+      "It is the season's first real trophy and its least representative fixture: both sides are usually a fortnight into pre-season, often mid-rebuild, and the format offers no way back — a draw after ninety minutes goes directly to penalties with no extra time.",
+      "Nobody would call it a major honour, but it is a competitive European final in the second week of August, which makes it the best football available on the day it is played.",
+    ],
+  },
+  "Trophée des Champions": {
+    slug: "trophee-des-champions", abbr: "TdC", country: "France", tier: "Domestic super cup",
+    teams: 2, format: "Single match; penalties if level after 90 minutes",
+    blurb: [
+      "France's season curtain-raiser, between the Ligue 1 champions and the Coupe de France winners. When one club wins both, the league runner-up takes the second place.",
+      "The LFP spent much of the last decade selling the match abroad — Tel Aviv, Beijing, Doha, Kuwait — before recent editions came home. The 2026 final is at Lens' Stade Bollaert-Delelis, one of the loudest grounds in the country, with Lens hosting as Coupe de France holders.",
+      "PSG have won it so often that its competitive value is mostly symbolic, but it is the only chance all season to see the champions in a one-off final on someone else's pitch.",
+    ],
+  },
 };
 
 export const compBySlug = slug =>

@@ -77,6 +77,7 @@ export const LEAGUE_FALLBACK = {
   "Bundesliga": 42, "Ligue 1": 40, "EFL Cup": 26, "FA Cup": 26,
   "Copa del Rey": 28, "Coppa Italia": 28, "DFB-Pokal": 26, "Coupe de France": 26,
   "UEFA Champions League": 70, "UEFA Europa League": 48, "UEFA Conference League": 34,
+  "UEFA Super Cup": 66, "Trophée des Champions": 55,
 };
 
 // Competition weighting applied to the stature product. European nights and
@@ -84,6 +85,10 @@ export const LEAGUE_FALLBACK = {
 // against lower-division sides carry less than the same clubs in the league.
 export const COMP_WEIGHT = {
   "UEFA Champions League": 1.15,
+  // A one-off trophy between the Champions League and Europa League holders —
+  // no second leg, no group to recover in, so it rates with the UCL.
+  "UEFA Super Cup": 1.15,
+  "Trophée des Champions": 0.95,
   "UEFA Europa League": 1.08,
   "UEFA Conference League": 1.05,
   "EFL Cup": 0.85, "FA Cup": 0.9, "DFB-Pokal": 0.85,
