@@ -563,6 +563,18 @@ const CUP_FIXTURES = [
   // Ties are pencilled in for the week of Aug 25 — kickoff times not yet set.
   { clubId: "lincoln", opponent: "Blackpool", venue: "A", comp: "EFL Cup", date: "2026-08-25" },
   { clubId: "westbrom", opponent: "Newcastle United", venue: "A", comp: "EFL Cup", date: "2026-08-25" },
+  // The last week of pre-season friendlies. Everything earlier has been played
+  // and arrives as a result from the API; these are seeded so they show before
+  // the first sync of the day. Kept deliberately low-rated — see COMP_WEIGHT.
+  { clubId: "deportivo", opponentId: "realmadrid", opponent: "Real Madrid", venue: "H", comp: "Friendly", date: "2026-08-12", time: "2:00 PM CT" },
+  { clubId: "marseille", opponent: "Atlético Madrid", venue: "H", comp: "Friendly", date: "2026-08-14", time: "10:30 AM CT" },
+  { clubId: "bremen", opponent: "AJ Auxerre", venue: "H", comp: "Friendly", date: "2026-08-15", time: "7:30 AM CT" },
+  { clubId: "lorient", opponent: "SV Elversberg", venue: "A", comp: "Friendly", date: "2026-08-15", time: "8:00 AM CT" },
+  { clubId: "brighton", opponent: "Bologna", venue: "H", comp: "Friendly", date: "2026-08-15", time: "9:00 AM CT" },
+  { clubId: "rennes", opponent: "Sunderland", venue: "A", comp: "Friendly", date: "2026-08-15", time: "9:00 AM CT" },
+  { clubId: "milan", opponent: "Manchester United", venue: "N", comp: "Friendly", date: "2026-08-15", time: "9:45 AM CT" },  // Wrocław
+  { clubId: "barcelona", opponent: "FC Basel", venue: "A", comp: "Friendly", date: "2026-08-16", time: "9:30 AM CT" },
+  { clubId: "realmadrid", opponent: "Schalke 04", venue: "A", comp: "Friendly", date: "2026-08-16", time: "10:00 AM CT" },
 ];
 
 // Fixtures whose released date later moved (TV picks etc.). The app deletes the

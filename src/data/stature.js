@@ -77,7 +77,7 @@ export const LEAGUE_FALLBACK = {
   "Bundesliga": 42, "Ligue 1": 40, "EFL Cup": 26, "FA Cup": 26,
   "Copa del Rey": 28, "Coppa Italia": 28, "DFB-Pokal": 26, "Coupe de France": 26,
   "UEFA Champions League": 70, "UEFA Europa League": 48, "UEFA Conference League": 34,
-  "UEFA Super Cup": 66, "Trophée des Champions": 55,
+  "UEFA Super Cup": 66, "Trophée des Champions": 55, "Friendly": 30,
 };
 
 // Competition weighting applied to the stature product. European nights and
@@ -93,6 +93,9 @@ export const COMP_WEIGHT = {
   "UEFA Conference League": 1.05,
   "EFL Cup": 0.85, "FA Cup": 0.9, "DFB-Pokal": 0.85,
   "Coppa Italia": 0.85, "Copa del Rey": 0.85, "Coupe de France": 0.85,
+  // Nothing is at stake and the teams are half strangers: a friendly should
+  // never outrank a competitive match between the same two clubs.
+  "Friendly": 0.45,
 };
 
 // A derby is worth watching even when neither side is fashionable, so rivalry

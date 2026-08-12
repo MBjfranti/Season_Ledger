@@ -39,6 +39,10 @@ export const COMP_SLUGS = {
   // carry them, which is why PSG's Aug 12 and Aug 16 finals were missing.
   "UEFA Super Cup": "uefa.super_cup",
   "Trophée des Champions": "fra.super_cup",
+  // Pre-season and mid-season friendlies. Every club plays them, so "Friendly"
+  // is on every club's comps list; they carry a low weight and are kept out of
+  // the W-D-L record (see recordFor in store.js).
+  "Friendly": "club.friendly",
 };
 
 const SLUG_COMPS = Object.fromEntries(

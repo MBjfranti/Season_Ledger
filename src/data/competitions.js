@@ -161,6 +161,15 @@ export const COMPETITIONS = {
       "PSG have won it so often that its competitive value is mostly symbolic, but it is the only chance all season to see the champions in a one-off final on someone else's pitch.",
     ],
   },
+  "Friendly": {
+    slug: "friendlies", abbr: "Friendly", country: "Anywhere", tier: "Non-competitive",
+    teams: "Any two clubs who agree a date", format: "Single match, unlimited substitutions, nothing at stake",
+    blurb: [
+      "Pre-season tours, testimonials and international-break run-outs. They are arranged by the clubs themselves, which is why the opposition can be anything from a European champion to a regional fourth-tier side.",
+      "Nothing about them is representative. Managers empty the bench at half time, trialists play, and a 4–3 in early August tells you almost nothing about September. What they do offer is a first look at new signings and at whatever shape the coach has been working on in training.",
+      "They are tracked here for that reason only: results in this competition are kept out of the club records and are weighted well below a competitive match when the calendar picks what to watch.",
+    ],
+  },
 };
 
 export const compBySlug = slug =>

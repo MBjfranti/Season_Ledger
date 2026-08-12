@@ -466,6 +466,9 @@ export function recordFor(clubId) {
   const ms = [...(state.matches[clubId] || [])].sort((a, b) => a.date.localeCompare(b.date));
   const rec = { p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, leagueP: 0, form: [] };
   for (const m of ms) {
+    // Friendlies are logged and shown like any other match, but a pre-season
+    // 4–3 against a touring side is not part of anyone's season record.
+    if (m.comp === "Friendly") continue;
     const r = m.gf > m.ga ? "W" : m.gf < m.ga ? "L" : "D";
     rec.p++; rec.gf += m.gf; rec.ga += m.ga;
     if (r === "W") rec.w++; else if (r === "D") rec.d++; else rec.l++;
