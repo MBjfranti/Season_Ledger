@@ -177,3 +177,8 @@ export const compBySlug = slug =>
 
 export const compAbbr = name => COMPETITIONS[name]?.abbr || name;
 export const compSlug = name => COMPETITIONS[name]?.slug || null;
+
+// Nothing at stake. Read off the tier rather than testing for "Friendly" by
+// name, so a testimonial or a summer tournament added later classifies itself.
+export const isNonCompetitive = name =>
+  COMPETITIONS[name]?.tier === "Non-competitive";

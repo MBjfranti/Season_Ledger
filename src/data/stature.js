@@ -110,8 +110,15 @@ export const MUST_WATCH_BONUS = 12;
 
 const KEYS = Object.keys(STATURE).sort((a, b) => b.length - a.length);
 
-export function statureFor(name, comp) {
+// The table lookup on its own — undefined when nothing matches, so a caller
+// holding several names for the same club can try the next one instead of
+// taking a fallback that a later form would have beaten.
+export function statureMatch(name) {
   const n = (name || "").toLowerCase();
   for (const k of KEYS) if (n.includes(k)) return STATURE[k];
-  return LEAGUE_FALLBACK[comp] ?? 35;
+  return undefined;
+}
+
+export function statureFor(name, comp) {
+  return statureMatch(name) ?? LEAGUE_FALLBACK[comp] ?? 35;
 }

@@ -1,8 +1,9 @@
 // Pure helpers shared across views — no app state in here.
 
 import { CLUBS, BROADCAST, RIVALS, BIG_OPPONENTS } from "./data/data.js";
-import { statureFor, COMP_WEIGHT, DERBY_LIFT,
+import { statureFor, statureMatch, COMP_WEIGHT, DERBY_LIFT,
          BOTH_CLUBS_BONUS, MUST_WATCH_BONUS } from "./data/stature.js";
+import { isNonCompetitive } from "./data/competitions.js";
 
 export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -91,7 +92,11 @@ export function fixtureReasons(f) {
   }
   if (f.derby || matchesAny(f.opponent, RIVALS[f.clubId])) reasons.push("Derby");
   if (matchesAny(f.opponent, BIG_OPPONENTS[club.league])) reasons.push("Big opponent");
-  if (/UEFA/.test(f.comp)) reasons.push("European night");
+  // A friendly is not the league fixture either, but calling it a cup tie
+  // reads as a knockout round with something on the line — which is the one
+  // thing it is not. Name it for what it is and stop the comparison there.
+  if (isNonCompetitive(f.comp)) reasons.push("Friendly");
+  else if (/UEFA/.test(f.comp)) reasons.push("European night");
   else if (f.comp !== club.leagueComp) reasons.push("Cup tie");
   if (f.mustWatch) reasons.push("Marked must-watch");
   return reasons;
@@ -101,12 +106,24 @@ export function fixtureReasons(f) {
 // multiplied rather than averaged, so a match is only as good as its weaker
 // side: two giants meeting scores in the nineties, a mid-table pairing in the
 // teens. Competition weight, derby lift and personal pull are layered on top.
+// A tracked club's stature, looked up through every name it answers to rather
+// than the display short alone. "Barça" and "Paris" match no STATURE key, so
+// the short-only lookup handed Barcelona and PSG their league's fallback — 30
+// in a friendly, 42 in La Liga — and quietly rated the two biggest clubs on the
+// slate as mid-table in every fixture they played.
+function clubStature(club, comp) {
+  for (const form of clubNameForms(club)) {
+    const s = statureMatch(form);
+    if (s !== undefined) return s;
+  }
+  return statureFor(club.short, comp);
+}
+
 export function watchRating(f) {
   const club = clubById(f.clubId);
-  const mine = statureFor(club ? club.short : f.clubId, f.comp);
-  const theirs = f.opponentId
-    ? statureFor(clubById(f.opponentId)?.short || f.opponent, f.comp)
-    : statureFor(f.opponent, f.comp);
+  const mine = club ? clubStature(club, f.comp) : statureFor(f.clubId, f.comp);
+  const oppClub = f.opponentId ? clubById(f.opponentId) : null;
+  const theirs = oppClub ? clubStature(oppClub, f.comp) : statureFor(f.opponent, f.comp);
 
   let r = (mine * theirs) / 100;
   r *= COMP_WEIGHT[f.comp] ?? 1;
